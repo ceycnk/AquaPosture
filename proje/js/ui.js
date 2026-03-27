@@ -234,20 +234,38 @@ const ui = {
             el.className = `absolute text-[80px] md:text-[120px] select-none transition-all duration-[5000ms] ease-in-out drop-shadow-2xl z-20`;
             el.innerHTML = fish.emoji;
             
-            // Başlangıç rotası
-            el.style.left = Math.floor(Math.random() * 80) + "%";
-            el.style.top = Math.floor(Math.random() * 80) + "%";
+            el.dataset.eating = "false";
             
-            // Animasyon türleri (Tailwind css bounce ve pulse)
+            let currentX = Math.floor(Math.random() * 80);
+            let currentY = Math.floor(Math.random() * 80);
+            el.style.left = currentX + "%";
+            el.style.top = currentY + "%";
+            
             if(i % 3 === 0) el.classList.add('animate-pulse');
             else if (i % 2 === 0) el.classList.add('animate-bounce');
             
-            // Hareket etmelerini sağlamak için basit bir interval
-            setInterval(() => {
-                el.style.left = Math.floor(Math.random() * 80) + "%";
-                el.style.top = Math.floor(Math.random() * 80) + "%";
-            }, Math.floor(Math.random() * 4000) + 4000); // 4-8 saniyede bir yer değiştir
+            el.startPatrol = () => {
+                el.style.transition = "all 4s ease-in-out"; 
+                el.patrolInterval = setInterval(() => {
+                    const rect = el.getBoundingClientRect();
+                    const rectCenterX = rect.left + rect.width / 2;
+                    
+                    let nextX = Math.floor(Math.random() * 80);
+                    let nextY = Math.floor(Math.random() * 80);
+                    const expectedNextPxX = (window.innerWidth * nextX) / 100;
+                    
+                    if (expectedNextPxX > rectCenterX) {
+                        el.style.transform = "scaleX(-1)";
+                    } else {
+                        el.style.transform = "scaleX(1)";
+                    }
+                    
+                    el.style.left = nextX + "%";
+                    el.style.top = nextY + "%";
+                }, Math.floor(Math.random() * 4000) + 4000); // 4-8 saniye aralığında gezin
+            };
 
+            el.startPatrol();
             container.appendChild(el);
         });
     },
@@ -272,7 +290,8 @@ const ui = {
     
     checkAndInitDirt: function() {
         const todayStr = new Date().toDateString();
-        const lastCleanStr = localStorage.getItem('lastCleanDate');
+        // DEMO & TEST İÇİN HER ZAMAN KİRLİ BAŞLASIN: (Daha sonra || kısmını silebiliriz)
+        const lastCleanStr = "TEST"; // localStorage.getItem('lastCleanDate');
         
         // Eğer en son temizlik tarihi bugün değilse (Önceki günse veya ilk girişi ise) cam kirlenir
         if (lastCleanStr !== todayStr) {
@@ -312,6 +331,24 @@ const ui = {
         ctx.arc(e.clientX, e.clientY, 80, 0, Math.PI*2);
         ctx.fill();
         
+        // Sabun Köpüğü Emojisi 🫧 Çıkart
+        if (Math.random() > 0.7) { 
+            const bubble = document.createElement('div');
+            bubble.className = "absolute text-3xl md:text-5xl opacity-80 pointer-events-none drop-shadow-md z-[35]";
+            bubble.textContent = "🫧";
+            bubble.style.left = (e.clientX - 20 + (Math.random()*40-20)) + "px";
+            bubble.style.top = (e.clientY - 20 + (Math.random()*40-20)) + "px";
+            bubble.style.transition = "top 1s ease-out, opacity 1s ease-out, transform 1s ease-out";
+            document.getElementById('aquarium-bg').appendChild(bubble);
+            
+            requestAnimationFrame(() => {
+                bubble.style.top = (e.clientY - 100) + "px"; 
+                bubble.style.opacity = "0";
+                bubble.style.transform = "scale(1.5)";
+            });
+            setTimeout(() => bubble.remove(), 1000);
+        }
+        
         this.glassCleanProgress++;
         
         // Eğer fazlaca yeri (mesela 300 parça pixel haraketini) sildiyse; tam temizlenmiş say
@@ -337,25 +374,71 @@ const ui = {
     dropFishFood: function(x, y) {
         const bg = this.elements.aquariumBg;
         const food = document.createElement('div');
-        food.className = "absolute rounded-full bg-orange-600 z-10 border border-orange-800 pointer-events-none drop-shadow-[0_0_8px_rgba(234,88,12,0.6)]";
+        food.className = "absolute rounded-full bg-orange-600 z-[25] border border-orange-900 pointer-events-none drop-shadow-[0_0_8px_rgba(234,88,12,0.9)]";
         
-        // Rastgele minik boyutta tanecikler
-        const size = Math.floor(Math.random() * 5) + 6;
+        // Rastgele boyut
+        const size = Math.floor(Math.random() * 6) + 12; // 12-18px
         food.style.width = size + "px";
         food.style.height = size + "px";
         food.style.left = (x - size/2) + "px";
         food.style.top = y + "px";
-        food.style.transition = "top 3s ease-in, opacity 3s ease-in";
+        
+        // 2 saniyelik düşüş animasyonu
+        food.style.transition = "top 2s ease-out, opacity 0.5s ease";
         bg.appendChild(food);
+        
+        // Yemin duracağı kordinat
+        const stopY = Math.min(y + 300 + Math.random()*200, window.innerHeight - 100);
         
         // Tarayıcı çizimi için ufak mini gecikme
         requestAnimationFrame(() => {
-            food.style.top = (window.innerHeight + 100) + "px"; 
-            food.style.opacity = "0";
+            food.style.top = stopY + "px"; 
         });
         
+        // --- BALIK AI (Yemi Yeme Algoritması) ---
+        const fishes = document.querySelectorAll('#fish-container > div');
+        let assignedFish = null;
+        
+        if (fishes.length > 0) {
+            // Boşta olan ve şu an yemek yemeyen balıkları bul
+            let availableFishes = Array.from(fishes).filter(f => f.dataset.eating !== "true");
+            if(availableFishes.length === 0) availableFishes = Array.from(fishes); // Hepsi meşgulse rastgele birini seç
+            
+            assignedFish = availableFishes[Math.floor(Math.random() * availableFishes.length)];
+            assignedFish.dataset.eating = "true";
+            
+            // Mevcut rastgele yüzmesini durdur
+            if (assignedFish.patrolInterval) {
+                clearInterval(assignedFish.patrolInterval);
+            }
+            
+            // Balığı yemin duracağı kordinata yüzdür
+            setTimeout(() => {
+                 const rect = assignedFish.getBoundingClientRect();
+                 const currentLeftX = rect.left;
+                 
+                 // Yemin pozisyonuna göre balığı sağa/sola döndür
+                 if (x > currentLeftX) {
+                     assignedFish.style.transform = "scaleX(-1)";
+                 } else {
+                     assignedFish.style.transform = "scaleX(1)";
+                 }
+                 
+                 // Hedefe Yüzme Animasyonu
+                 assignedFish.style.transition = "all 1.5s ease-in-out"; 
+                 assignedFish.style.left = (x > currentLeftX ? x - 80 : x - 20) + "px"; // minik ağız payı 
+                 assignedFish.style.top = (stopY - 60) + "px";
+            }, 50); // Mermiye koşmaya minik bir gecikmeyle başlasın
+        }
+        
+        // Yemin Midede Kaybolma Anı
         setTimeout(() => {
-            food.remove();
-        }, 3000);
+            food.style.opacity = "0";
+            if (assignedFish) {
+                 assignedFish.dataset.eating = "false";
+                 if (assignedFish.startPatrol) assignedFish.startPatrol();
+            }
+            setTimeout(() => food.remove(), 500);
+        }, 2200); // 2s düşme + 200ms bekleme
     }
 };

@@ -18,22 +18,23 @@ const app = {
             alert("✨ Harika, Akvaryum Camlarını Tertemiz Yaptın!");
         };
         
-        // Fare hareketini küresel olarak yakala ve seçili ARACA göre Yemleme/Temizleme yap
-        app.lastFeedTime = 0;
+        // Fare hareketini küresel olarak yakala ve moduna göre Yemleme/Temizleme yap
         document.addEventListener('mousemove', (e) => {
             if(!ui.isAquariumMode || !ui.activeTool) return; // Araç seçili değilse işlem yapma
             
             if(ui.activeTool === 'sponge' && ui.isGlassDirty) {
                 // Sadece Sünger seçiliyken ve cam kirliyken temizle
                 ui.cleanGlass(e);
-            } else if (ui.activeTool === 'food') {
-                // Sadece Yem seçiliyken balıklara yem at
-                const now = Date.now();
-                if(now - app.lastFeedTime > 250) { // 250ms tavanı
-                    app.lastFeedTime = now;
-                    ui.dropFishFood(e.clientX, e.clientY);
-                }
             }
+        });
+        
+        // Tıklama Eylemi: Sadece Yem seçiliyken çalışır
+        document.addEventListener('click', (e) => {
+            if(!ui.isAquariumMode || ui.activeTool !== 'food') return;
+            // Menülere tıklamayı engelle
+            if(e.target.closest('#aquarium-tools') || e.target.closest('#exit-aquarium-btn')) return;
+            
+            ui.dropFishFood(e.clientX, e.clientY);
         });
         
         // --- KAMERA ---
