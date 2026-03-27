@@ -12,6 +12,30 @@ const app = {
         console.log("🌊 AquaPosture Başlatılıyor...");
         ui.initBubbles(); // Akvaryum su kabarcığı animasyonlarını çalıştır
         
+        // Akvaryum cam kirliliğini kontrol edip yükle
+        ui.checkAndInitDirt();
+        ui.onGlassCleaned = () => {
+            alert("✨ Harika, Akvaryum Camlarını Tertemiz Yaptın!");
+        };
+        
+        // Fare hareketini küresel olarak yakala ve seçili ARACA göre Yemleme/Temizleme yap
+        app.lastFeedTime = 0;
+        document.addEventListener('mousemove', (e) => {
+            if(!ui.isAquariumMode || !ui.activeTool) return; // Araç seçili değilse işlem yapma
+            
+            if(ui.activeTool === 'sponge' && ui.isGlassDirty) {
+                // Sadece Sünger seçiliyken ve cam kirliyken temizle
+                ui.cleanGlass(e);
+            } else if (ui.activeTool === 'food') {
+                // Sadece Yem seçiliyken balıklara yem at
+                const now = Date.now();
+                if(now - app.lastFeedTime > 250) { // 250ms tavanı
+                    app.lastFeedTime = now;
+                    ui.dropFishFood(e.clientX, e.clientY);
+                }
+            }
+        });
+        
         // --- KAMERA ---
         const startCamBtn = document.getElementById('start-camera-btn');
         const toggleCamBtn = document.getElementById('toggle-camera-btn');
@@ -102,6 +126,12 @@ const app = {
         }
         if(ui.elements.exitAquariumBtn) {
             ui.elements.exitAquariumBtn.addEventListener('click', () => ui.toggleAquariumMode(false));
+        }
+        if(ui.elements.toolSponge) {
+            ui.elements.toolSponge.addEventListener('click', () => ui.selectTool('sponge'));
+        }
+        if(ui.elements.toolFood) {
+            ui.elements.toolFood.addEventListener('click', () => ui.selectTool('food'));
         }
 
         if(ui.elements.marketBtn) {

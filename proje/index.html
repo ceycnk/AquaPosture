@@ -18,12 +18,30 @@
     <div id="aquarium-bg" class="fixed inset-0 z-0 bg-gradient-to-b from-cyan-400 via-blue-600 to-blue-900 transition-all duration-700 ease-in-out">
         <!-- Akvaryum Balıkları JS Tarafından Buraya Dinamik Doldurulacak -->
         <div id="fish-container" class="absolute inset-0 w-full h-full pointer-events-none z-10"></div>
+        
+        <!-- Yosunlu (Kirli) Cam Canvas Katmanı -->
+        <canvas id="dirty-glass" class="absolute inset-0 z-30 hidden pointer-events-none"></canvas>
+
+        <!-- Dekoratif Mercan ve Deniz Tabanı (Gerçekçi Arkaplan) -->
+        <div id="corals-layer" class="absolute bottom-0 w-full h-[55vh] pointer-events-none z-[5] bg-[url('https://images.unsplash.com/photo-1546026423-cc4642628d2b?q=80&w=2000&auto=format&fit=crop')] bg-cover bg-bottom opacity-40 mix-blend-overlay" style="mask-image: linear-gradient(to top, black, transparent); -webkit-mask-image: linear-gradient(to top, black, transparent);"></div>
     </div>
 
     <!-- Tam ekran Akvaryum Modu Çıkış Butonu (Sadece Akvaryum İzlerken Görünür) -->
     <button id="exit-aquarium-btn" class="fixed bottom-10 left-1/2 transform -translate-x-1/2 z-[60] bg-teal-800/80 hover:bg-teal-700 backdrop-blur-xl text-white px-8 py-4 rounded-full font-black text-xl shadow-2xl transition-all hidden hover:scale-105 active:scale-95 flex items-center gap-3 border border-teal-500/50">
         👀 Panoya Geri Dön
     </button>
+    
+    <!-- Akvaryum Araçları Menüsü -->
+    <div id="aquarium-tools" class="hidden fixed right-6 top-1/2 transform -translate-y-1/2 z-[70] flex flex-col gap-5 bg-white/20 backdrop-blur-xl p-3 rounded-3xl border border-white/30 shadow-2xl">
+        <button id="tool-sponge" class="group w-16 h-16 bg-white/50 hover:bg-white/90 text-4xl rounded-2xl shadow-md transition-all flex items-center justify-center border-[3px] border-transparent active:scale-95 relative" title="Sünger (Camı Temizle)">
+            🧽
+            <span class="absolute right-20 bg-gray-800 text-white text-sm font-bold px-3 py-2 rounded-xl opacity-0 group-hover:opacity-100 whitespace-nowrap pointer-events-none transition-opacity">🧼 Camı Temizle</span>
+        </button>
+        <button id="tool-food" class="group w-16 h-16 bg-white/50 hover:bg-white/90 text-4xl rounded-2xl shadow-md transition-all flex items-center justify-center border-[3px] border-transparent active:scale-95 relative" title="Yem At">
+            🥫
+            <span class="absolute right-20 bg-gray-800 text-white text-sm font-bold px-3 py-2 rounded-xl opacity-0 group-hover:opacity-100 whitespace-nowrap pointer-events-none transition-opacity">🐟 Yem At</span>
+        </button>
+    </div>
 
     <div id="ui-layer" class="relative z-10 h-screen w-screen flex flex-col p-6 max-w-6xl mx-auto transition-all duration-700 ease-in-out">
         

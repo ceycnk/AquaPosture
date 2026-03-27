@@ -10,6 +10,11 @@ window.FISH_CATALOG = [
 ];
 
 const ui = {
+    isAquariumMode: false,
+    isGlassDirty: false,
+    glassCleanProgress: 0,
+    onGlassCleaned: null,
+
     elements: {
         uiLayer: document.getElementById('ui-layer'),
         timerDisplay: document.getElementById('timer-display'),
@@ -30,6 +35,9 @@ const ui = {
         // Market & Aquarium UI
         viewAquariumBtn: document.getElementById('view-aquarium-btn'),
         exitAquariumBtn: document.getElementById('exit-aquarium-btn'),
+        aquariumTools: document.getElementById('aquarium-tools'),
+        toolSponge: document.getElementById('tool-sponge'),
+        toolFood: document.getElementById('tool-food'),
         marketBtn: document.getElementById('market-btn'),
         marketModal: document.getElementById('market-modal'),
         closeMarketBtn: document.getElementById('close-market-btn'),
@@ -108,15 +116,46 @@ const ui = {
 
     // --- MARKET VE AKVARYUM GÖRSELLERİ ---
 
+    activeTool: null,
+
+    selectTool: function(toolName) {
+        // Aynı butona basılıyorsa seçimi iptal et
+        if (this.activeTool === toolName) {
+            this.activeTool = null;
+            this.elements.toolSponge.classList.remove('border-teal-500', 'bg-white');
+            this.elements.toolFood.classList.remove('border-teal-500', 'bg-white');
+            document.body.style.cursor = 'default';
+            return;
+        }
+
+        this.activeTool = toolName;
+        this.elements.toolSponge.classList.remove('border-teal-500', 'bg-white');
+        this.elements.toolFood.classList.remove('border-teal-500', 'bg-white');
+        
+        if (toolName === 'sponge') {
+            this.elements.toolSponge.classList.add('border-teal-500', 'bg-white');
+            // Fare imlecini sünger emojisi yap
+            document.body.style.cursor = 'url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'48\' height=\'48\'><text y=\'38\' font-size=\'38\'>🧽</text></svg>") 24 24, auto';
+        } else if (toolName === 'food') {
+            this.elements.toolFood.classList.add('border-teal-500', 'bg-white');
+            // Fare imlecini yem kutusu emojisi yap
+            document.body.style.cursor = 'url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'48\' height=\'48\'><text y=\'38\' font-size=\'38\'>🥫</text></svg>") 24 24, auto';
+        }
+    },
+
     toggleAquariumMode: function(isAquariumMode) {
+        this.isAquariumMode = isAquariumMode;
         if (isAquariumMode) {
             // Arayüzü gizle, sadece akvaryum kalsın
             this.elements.uiLayer.classList.add('opacity-0', 'scale-110', 'pointer-events-none');
             this.elements.exitAquariumBtn.classList.remove('hidden');
+            this.elements.aquariumTools.classList.remove('hidden');
         } else {
             // Arayüzü geri getir
             this.elements.uiLayer.classList.remove('opacity-0', 'scale-110', 'pointer-events-none');
             this.elements.exitAquariumBtn.classList.add('hidden');
+            this.elements.aquariumTools.classList.add('hidden');
+            this.selectTool(null); // Araç seçimini sıfırla
         }
     },
 
@@ -227,5 +266,96 @@ const ui = {
             bubble.style.animationDelay = (Math.random() * 5) + "s";
             bg.appendChild(bubble);
         }
+    },
+    
+    // --- AKVARYUM ETKİLEŞİMLERİ (KİRLİ CAM VE YEM) ---
+    
+    checkAndInitDirt: function() {
+        const todayStr = new Date().toDateString();
+        const lastCleanStr = localStorage.getItem('lastCleanDate');
+        
+        // Eğer en son temizlik tarihi bugün değilse (Önceki günse veya ilk girişi ise) cam kirlenir
+        if (lastCleanStr !== todayStr) {
+            this.isGlassDirty = true;
+            this.glassCleanProgress = 0;
+            
+            const canvas = document.getElementById('dirty-glass');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            const ctx = canvas.getContext('2d');
+            
+            // Yosun/Pislik Tabanı (Sıvı bulanıklık)
+            ctx.fillStyle = 'rgba(30, 80, 40, 0.4)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Yoğun kirli lekeleri
+            for(let i=0; i<300; i++) {
+                ctx.beginPath();
+                ctx.arc(Math.random()*canvas.width, Math.random()*canvas.height, Math.random()*30+10, 0, Math.PI*2);
+                ctx.fillStyle = 'rgba(10, 50, 20, 0.3)';
+                ctx.fill();
+            }
+            
+            canvas.classList.remove('hidden');
+        }
+    },
+    
+    cleanGlass: function(e) {
+        if(!this.isGlassDirty) return;
+        const canvas = document.getElementById('dirty-glass');
+        const ctx = canvas.getContext('2d');
+        
+        // Fare üstünden geçtikçe silen mod (destination-out)
+        ctx.globalCompositeOperation = 'destination-out';
+        ctx.beginPath();
+        // Sabunla silme boyutunu belirleyen yarıçap
+        ctx.arc(e.clientX, e.clientY, 80, 0, Math.PI*2);
+        ctx.fill();
+        
+        this.glassCleanProgress++;
+        
+        // Eğer fazlaca yeri (mesela 300 parça pixel haraketini) sildiyse; tam temizlenmiş say
+        if(this.glassCleanProgress > 250) { 
+            this.isGlassDirty = false;
+            
+            // Yosunu tamamen uçurma ve kaybetme animasyonu
+            canvas.style.transition = "opacity 2s ease";
+            canvas.style.opacity = "0";
+            
+            localStorage.setItem('lastCleanDate', new Date().toDateString());
+            
+            if(this.onGlassCleaned) this.onGlassCleaned();
+            
+            setTimeout(() => {
+                canvas.classList.add('hidden');
+                canvas.style.transition = "";
+                canvas.style.opacity = "1";
+            }, 2000);
+        }
+    },
+    
+    dropFishFood: function(x, y) {
+        const bg = this.elements.aquariumBg;
+        const food = document.createElement('div');
+        food.className = "absolute rounded-full bg-orange-600 z-10 border border-orange-800 pointer-events-none drop-shadow-[0_0_8px_rgba(234,88,12,0.6)]";
+        
+        // Rastgele minik boyutta tanecikler
+        const size = Math.floor(Math.random() * 5) + 6;
+        food.style.width = size + "px";
+        food.style.height = size + "px";
+        food.style.left = (x - size/2) + "px";
+        food.style.top = y + "px";
+        food.style.transition = "top 3s ease-in, opacity 3s ease-in";
+        bg.appendChild(food);
+        
+        // Tarayıcı çizimi için ufak mini gecikme
+        requestAnimationFrame(() => {
+            food.style.top = (window.innerHeight + 100) + "px"; 
+            food.style.opacity = "0";
+        });
+        
+        setTimeout(() => {
+            food.remove();
+        }, 3000);
     }
 };
