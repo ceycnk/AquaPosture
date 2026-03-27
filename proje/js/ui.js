@@ -403,22 +403,23 @@ const ui = {
         food.style.width = size + "px";
         food.style.height = size + "px";
         
-        // Kullanıcı "Yem yukarıdan aşağı dökülsün" dediği için Y eksenini ekran başına alıyoruz.
-        // X eksenini ise tıklanan yere ayarlıyoruz, böylece tam tıklandığı hizadan düşüyor
+        // Yem tam fare tıklandığı X ve Y'den başlasın
         food.style.left = (x - size/2) + "px";
-        food.style.top = "-20px"; // En üstten başla
+        food.style.top = y + "px"; 
         
-        // Düşüş animasyon süresi, ekran boyuna göre yavaş
+        // Düşüş animasyon süresi, en dibe doğru
         food.style.transition = "top 3s linear, opacity 0.5s ease";
         bg.appendChild(food);
         
-        // Yemin duracağı asıl tıklanan Y hizası hedefi. Minimum 100 max tıklanan yer.
-        const stopY = Math.max(100, y);
+        const floorY = window.innerHeight + 50; // Ekranın en altı
         
-        // Tarayıcı çizimi için ufak mini gecikme
         requestAnimationFrame(() => {
-            food.style.top = stopY + "px"; 
+            food.style.top = floorY + "px"; 
         });
+        
+        // Yemi havada (düşerken 1.5 saniye sonra bulunduğu noktada) yakalama mantığı
+        // 3 saniyede floorY'ye varıyorsa; 1.5 saniyede yarısını kat eder.
+        const interceptY = y + (floorY - y) * 0.5;
         
         // --- BALIK AI (Yemi Yeme Algoritması) ---
         const fishes = document.querySelectorAll('#fish-container > div');
@@ -449,14 +450,14 @@ const ui = {
                      assignedFish.style.transform = "scaleX(1)";
                  }
                  
-                 // Hedefe Yüzme Animasyonu
-                 assignedFish.style.transition = "all 2.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)"; // Yumuşak ivme
+                 // Havada Yeme Yetişme Animasyonu (1.4 saniyede yemin o anki tahmini konumuna uçsun)
+                 assignedFish.style.transition = "all 1.4s ease-out"; 
                  assignedFish.style.left = (x > currentLeftX ? x - 80 : x - 20) + "px"; // minik ağız payı 
-                 assignedFish.style.top = (stopY - 60) + "px";
+                 assignedFish.style.top = (interceptY - 60) + "px";
             }, 50); // Mermiye koşmaya minik bir gecikmeyle başlasın
         }
         
-        // Yemin Midede Kaybolma Anı (Düşüş 3 saniye sürdüğü için fish'e varma anıyla eşleşmeli)
+        // Havada Yemin Midede Kaybolma Anı (Düşüşün 1.5'inci saniyesi, balık o sırada yakalar)
         setTimeout(() => {
             food.style.opacity = "0";
             if (assignedFish) {
@@ -464,6 +465,6 @@ const ui = {
                  if (assignedFish.startPatrol) assignedFish.startPatrol();
             }
             setTimeout(() => food.remove(), 500);
-        }, 2900); // 3s düşme + - 100ms ağız hizası payı
+        }, 1500); // 1.5s balık ve yem havada ortada buluşur
     }
 };
