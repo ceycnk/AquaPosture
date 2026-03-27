@@ -5,7 +5,7 @@ const poseManager = {
     camera: null,
     
     isGoodPosture: true,
-    calibrationY: 0, 
+    baseNeckY: 0, 
     isCalibrated: false,
     
     onPostureChange: null, 
@@ -101,12 +101,18 @@ const poseManager = {
     calibrate: function(landmarks) {
         const leftShoulder = landmarks[11];
         const rightShoulder = landmarks[12];
+        const leftEar = landmarks[7];
+        const rightEar = landmarks[8];
 
-        if (!leftShoulder || !rightShoulder) return;
+        if (!leftShoulder || !rightShoulder || !leftEar || !rightEar) return;
 
-        this.calibrationY = (leftShoulder.y + rightShoulder.y) / 2;
+        const midEarY = (leftEar.y + rightEar.y) / 2;
+        const midShoulderY = (leftShoulder.y + rightShoulder.y) / 2;
+        
+        // Omuzlar ve kulaklar arasındaki "diklik" (Y eksenindeki mesafe) ölçülür.
+        this.baseNeckY = midShoulderY - midEarY;
         this.isCalibrated = true;
-        console.log(`Kalibrasyon tamam. İdeal Omuz Y Seviyesi: ${this.calibrationY.toFixed(3)}`);
+        console.log(`Kalibrasyon tamam. İdeal Boyun Y Mesafesi: ${this.baseNeckY.toFixed(3)}`);
         
         if (this.onPostureChange) {
             this.isGoodPosture = true;
@@ -117,14 +123,22 @@ const poseManager = {
     analyzePosture: function(landmarks) {
         const leftShoulder = landmarks[11];
         const rightShoulder = landmarks[12];
+        const leftEar = landmarks[7];
+        const rightEar = landmarks[8];
         
-        if (!leftShoulder || !rightShoulder) return;
+        if (!leftShoulder || !rightShoulder || !leftEar || !rightEar) return;
 
-        const currentY = (leftShoulder.y + rightShoulder.y) / 2;
-        const threshold = this.calibrationY + 0.05; 
+        const midEarY = (leftEar.y + rightEar.y) / 2;
+        const midShoulderY = (leftShoulder.y + rightShoulder.y) / 2;
+        const currentNeckY = midShoulderY - midEarY;
+        
+        // Kambur durunca (Kafa öne düşünce), omuz-kulak dikey mesafesi kısalır.
+        // Eşik: İdeal dikliğin %80'inin altına düştüyse (Yani kafa %20'den fazla çöktüyse) kambur sayılır.
+        const threshold = this.baseNeckY * 0.80; 
         
         const wasGood = this.isGoodPosture;
-        this.isGoodPosture = (currentY <= threshold);
+        // Boyun dikliği eşiğin üzerindeyse (veya eşit), duruş İYİ
+        this.isGoodPosture = (currentNeckY >= threshold);
         
         if (wasGood !== this.isGoodPosture && this.onPostureChange) {
             this.onPostureChange(this.isGoodPosture);
