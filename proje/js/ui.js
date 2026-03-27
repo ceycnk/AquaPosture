@@ -1,5 +1,5 @@
-// ui.js - Sadece görsel işlemleri yönetir
-export const ui = {
+// ui.js - Sadece görsel işlemleri yönetir (Modülden Normal JS Objelerine çevrildi)
+const ui = {
     elements: {
         timerDisplay: document.getElementById('timer-display'),
         coinCounter: document.getElementById('coin-counter'),
@@ -19,22 +19,18 @@ export const ui = {
         this.elements.coinCounter.textContent = coins;
     },
     
-    // Duruş değiştiğinde UI tepkileri (Bulanıklaşma, Yazı değişimi vb.)
     setPostureState: function(isGoodPosture) {
         if(isGoodPosture) {
             this.elements.postureStatus.textContent = "✅ Harika, dik duruyorsun!";
-            // text-blue-500 vs olan varsayılan renkleri eziyoruz
             this.elements.postureStatus.className = "font-extrabold text-emerald-600 text-sm transition-colors";
             this.elements.aquariumBg.style.filter = "blur(0px) brightness(1)";
         } else {
             this.elements.postureStatus.textContent = "❌ Duruş bozuk! Lütfen dikleş.";
             this.elements.postureStatus.className = "font-extrabold text-rose-600 text-sm transition-colors animate-pulse";
-            // Kötü durduğunda akvaryum zehirlenir gibi bulanık ve karanlık olur (CSS ile birleşince hoş durur)
             this.elements.aquariumBg.style.filter = "blur(8px) brightness(0.7) sepia(0.3)";
         }
     },
     
-    // Kamera erişimi verilmezse zarif uyarı
     showCameraError: function(message) {
         this.elements.cameraOverlay.classList.remove('hidden');
         this.elements.cameraOverlay.innerHTML = `
@@ -45,7 +41,6 @@ export const ui = {
     
     hideCameraOverlay: function() {
         this.elements.cameraOverlay.classList.add('hidden');
-        // Tuval arka plan siyahlığını kaldıralım
         this.elements.outputCanvas.style.backgroundColor = 'transparent';
     }
 };
