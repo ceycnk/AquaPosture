@@ -332,9 +332,10 @@ const ui = {
         ctx.fill();
         
         // Sabun Köpüğü Emojisi 🫧 Çıkart
-        if (Math.random() > 0.7) { 
+        if (Math.random() > 0.8) { 
             const bubble = document.createElement('div');
-            bubble.className = "absolute text-3xl md:text-5xl opacity-80 pointer-events-none drop-shadow-md z-[35]";
+            // 'z-[35]' gibi dinamik tailwind claslari CDN tarafindan derlenmeyebilir, z-40 kullanildi
+            bubble.className = "absolute text-4xl opacity-80 pointer-events-none drop-shadow-md z-40";
             bubble.textContent = "🫧";
             bubble.style.left = (e.clientX - 20 + (Math.random()*40-20)) + "px";
             bubble.style.top = (e.clientY - 20 + (Math.random()*40-20)) + "px";
@@ -342,7 +343,7 @@ const ui = {
             document.getElementById('aquarium-bg').appendChild(bubble);
             
             requestAnimationFrame(() => {
-                bubble.style.top = (e.clientY - 100) + "px"; 
+                bubble.style.top = (e.clientY - 120) + "px"; 
                 bubble.style.opacity = "0";
                 bubble.style.transform = "scale(1.5)";
             });
@@ -351,44 +352,68 @@ const ui = {
         
         this.glassCleanProgress++;
         
-        // Eğer fazlaca yeri (mesela 300 parça pixel haraketini) sildiyse; tam temizlenmiş say
-        if(this.glassCleanProgress > 250) { 
-            this.isGlassDirty = false;
+        // Gercekci temizleme kontrolu: Acaba cam gercekten silindi mi? (Piksel taramasi)
+        // Her 50 silme isleminde bir camdaki piksellerin transparanligina bakalim
+        if(this.glassCleanProgress % 50 === 0) { 
+            const reqWidth = canvas.width;
+            const reqHeight = canvas.height;
+            // Tarayici kasmasin diye ufak bir orneklem aliyoruz (genel ekrani kuculterek veya step ile)
+            const imgData = ctx.getImageData(0, 0, reqWidth, reqHeight);
+            let transparentPixels = 0;
+            const step = 40; // zıplama
+            let totalChecked = 0;
             
-            // Yosunu tamamen uçurma ve kaybetme animasyonu
-            canvas.style.transition = "opacity 2s ease";
-            canvas.style.opacity = "0";
+            for (let i = 3; i < imgData.data.length; i += step * 4) {
+                if (imgData.data[i] === 0) {
+                    transparentPixels++;
+                }
+                totalChecked++;
+            }
             
-            localStorage.setItem('lastCleanDate', new Date().toDateString());
+            const cleanRatio = transparentPixels / totalChecked;
             
-            if(this.onGlassCleaned) this.onGlassCleaned();
-            
-            setTimeout(() => {
-                canvas.classList.add('hidden');
-                canvas.style.transition = "";
-                canvas.style.opacity = "1";
-            }, 2000);
+            // Eger cam yuzde 90 uzeri temizlendiyse
+            if (cleanRatio > 0.90) {
+                this.isGlassDirty = false;
+                
+                // Yosunu tamamen uçurma ve kaybetme animasyonu
+                canvas.style.transition = "opacity 2s ease";
+                canvas.style.opacity = "0";
+                
+                localStorage.setItem('lastCleanDate', new Date().toDateString());
+                
+                if(this.onGlassCleaned) this.onGlassCleaned();
+                
+                setTimeout(() => {
+                    canvas.classList.add('hidden');
+                    canvas.style.transition = "";
+                    canvas.style.opacity = "1";
+                }, 2000);
+            }
         }
     },
     
     dropFishFood: function(x, y) {
         const bg = this.elements.aquariumBg;
         const food = document.createElement('div');
-        food.className = "absolute rounded-full bg-orange-600 z-[25] border border-orange-900 pointer-events-none drop-shadow-[0_0_8px_rgba(234,88,12,0.9)]";
+        food.className = "absolute rounded-full bg-orange-600 z-50 border border-orange-900 pointer-events-none drop-shadow-[0_0_8px_rgba(234,88,12,0.9)]";
         
         // Rastgele boyut
         const size = Math.floor(Math.random() * 6) + 12; // 12-18px
         food.style.width = size + "px";
         food.style.height = size + "px";
-        food.style.left = (x - size/2) + "px";
-        food.style.top = y + "px";
         
-        // 2 saniyelik düşüş animasyonu
-        food.style.transition = "top 2s ease-out, opacity 0.5s ease";
+        // Kullanıcı "Yem yukarıdan aşağı dökülsün" dediği için Y eksenini ekran başına alıyoruz.
+        // X eksenini ise tıklanan yere ayarlıyoruz, böylece tam tıklandığı hizadan düşüyor
+        food.style.left = (x - size/2) + "px";
+        food.style.top = "-20px"; // En üstten başla
+        
+        // Düşüş animasyon süresi, ekran boyuna göre yavaş
+        food.style.transition = "top 3s linear, opacity 0.5s ease";
         bg.appendChild(food);
         
-        // Yemin duracağı kordinat
-        const stopY = Math.min(y + 300 + Math.random()*200, window.innerHeight - 100);
+        // Yemin duracağı asıl tıklanan Y hizası hedefi. Minimum 100 max tıklanan yer.
+        const stopY = Math.max(100, y);
         
         // Tarayıcı çizimi için ufak mini gecikme
         requestAnimationFrame(() => {
@@ -425,13 +450,13 @@ const ui = {
                  }
                  
                  // Hedefe Yüzme Animasyonu
-                 assignedFish.style.transition = "all 1.5s ease-in-out"; 
+                 assignedFish.style.transition = "all 2.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)"; // Yumuşak ivme
                  assignedFish.style.left = (x > currentLeftX ? x - 80 : x - 20) + "px"; // minik ağız payı 
                  assignedFish.style.top = (stopY - 60) + "px";
             }, 50); // Mermiye koşmaya minik bir gecikmeyle başlasın
         }
         
-        // Yemin Midede Kaybolma Anı
+        // Yemin Midede Kaybolma Anı (Düşüş 3 saniye sürdüğü için fish'e varma anıyla eşleşmeli)
         setTimeout(() => {
             food.style.opacity = "0";
             if (assignedFish) {
@@ -439,6 +464,6 @@ const ui = {
                  if (assignedFish.startPatrol) assignedFish.startPatrol();
             }
             setTimeout(() => food.remove(), 500);
-        }, 2200); // 2s düşme + 200ms bekleme
+        }, 2900); // 3s düşme + - 100ms ağız hizası payı
     }
 };
