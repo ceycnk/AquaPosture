@@ -331,23 +331,33 @@ const ui = {
         ctx.arc(e.clientX, e.clientY, 80, 0, Math.PI*2);
         ctx.fill();
         
-        // Sabun Köpüğü Emojisi 🫧 Çıkart
-        if (Math.random() > 0.8) { 
+        // Sabun Köpüğü (Emoji yerine evrensel CSS dairesi)
+        if (Math.random() > 0.6) { 
             const bubble = document.createElement('div');
-            // 'z-[35]' gibi dinamik tailwind claslari CDN tarafindan derlenmeyebilir, z-40 kullanildi
-            bubble.className = "absolute text-4xl opacity-80 pointer-events-none drop-shadow-md z-40";
-            bubble.textContent = "🫧";
+            // CSS JIT sorunlarına karşı hardcode Inline Stiller
+            bubble.style.position = "absolute";
+            bubble.style.width = (Math.random() * 20 + 10) + "px";
+            bubble.style.height = bubble.style.width;
+            bubble.style.borderRadius = "50%";
+            bubble.style.backgroundColor = "rgba(255,255,255,0.3)";
+            bubble.style.border = "1px solid rgba(255,255,255,0.8)";
+            bubble.style.boxShadow = "inset 0 0 10px rgba(255,255,255,0.5)";
+            bubble.style.zIndex = "9999";
+            bubble.style.pointerEvents = "none";
+            
+            // Konumlandırma
             bubble.style.left = (e.clientX - 20 + (Math.random()*40-20)) + "px";
             bubble.style.top = (e.clientY - 20 + (Math.random()*40-20)) + "px";
-            bubble.style.transition = "top 1s ease-out, opacity 1s ease-out, transform 1s ease-out";
+            bubble.style.transition = "top 1.5s ease-out, opacity 1.5s ease-out, transform 1.5s ease-out";
+            
             document.getElementById('aquarium-bg').appendChild(bubble);
             
             requestAnimationFrame(() => {
-                bubble.style.top = (e.clientY - 120) + "px"; 
+                bubble.style.top = (e.clientY - 150) + "px"; 
                 bubble.style.opacity = "0";
                 bubble.style.transform = "scale(1.5)";
             });
-            setTimeout(() => bubble.remove(), 1000);
+            setTimeout(() => bubble.remove(), 1500);
         }
         
         this.glassCleanProgress++;
@@ -360,11 +370,12 @@ const ui = {
             // Tarayici kasmasin diye ufak bir orneklem aliyoruz (genel ekrani kuculterek veya step ile)
             const imgData = ctx.getImageData(0, 0, reqWidth, reqHeight);
             let transparentPixels = 0;
-            const step = 40; // zıplama
+            const step = 40; // Piksel atlama adımı
             let totalChecked = 0;
             
             for (let i = 3; i < imgData.data.length; i += step * 4) {
-                if (imgData.data[i] === 0) {
+                // Kenar yumuşatmaları (anti-aliasing) hesaba katarak mutlak 0 yerine < 20 arıyoruz
+                if (imgData.data[i] < 20) {
                     transparentPixels++;
                 }
                 totalChecked++;
@@ -372,8 +383,8 @@ const ui = {
             
             const cleanRatio = transparentPixels / totalChecked;
             
-            // Eger cam yuzde 90 uzeri temizlendiyse
-            if (cleanRatio > 0.90) {
+            // Tolerans payı eklendi: %85 temizlendiyse temiz say (Kullanıcıyı yormamak için)
+            if (cleanRatio > 0.85) {
                 this.isGlassDirty = false;
                 
                 // Yosunu tamamen uçurma ve kaybetme animasyonu
@@ -396,9 +407,16 @@ const ui = {
     dropFishFood: function(x, y) {
         const bg = this.elements.aquariumBg;
         const food = document.createElement('div');
-        food.className = "absolute rounded-full bg-orange-600 z-50 border border-orange-900 pointer-events-none drop-shadow-[0_0_8px_rgba(234,88,12,0.9)]";
         
-        // Rastgele boyut
+        // CSS JIT derleyicisini by-pass eden garantili hardcode Inline Stiller
+        food.style.position = "absolute";
+        food.style.zIndex = "99999"; 
+        food.style.backgroundColor = "#ea580c"; // orange-600
+        food.style.border = "2px solid #7c2d12"; // orange-900
+        food.style.borderRadius = "50%";
+        food.style.pointerEvents = "none";
+        food.style.boxShadow = "0 0 10px rgba(234,88,12,0.8)";
+        
         const size = Math.floor(Math.random() * 6) + 12; // 12-18px
         food.style.width = size + "px";
         food.style.height = size + "px";
@@ -407,7 +425,6 @@ const ui = {
         food.style.left = (x - size/2) + "px";
         food.style.top = y + "px"; 
         
-        // Düşüş animasyon süresi, en dibe doğru
         food.style.transition = "top 3s linear, opacity 0.5s ease";
         bg.appendChild(food);
         
