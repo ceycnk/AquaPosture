@@ -14,7 +14,7 @@ Bu projede hibrit bir AI mimarisi kullanılmıştır:
 ---
 
 ## 🚀 Canlı Demo
-* **Yayın Linki:** [Buraya Vercel/GitHub Pages linkini ekle]
+* **Yayın Linki:** https://aquaposture.netlify.app/
 * **Demo Video:** [Buraya varsa Loom veya YouTube video linkini ekle]
 
 ---
@@ -31,7 +31,7 @@ Bu projede hibrit bir AI mimarisi kullanılmıştır:
 ## 💻 Nasıl Çalıştırılır?
 1.  **Depoyu Klonlayın:**
     ```bash
-    git clone [https://github.com/kullanici-adin/AquaPosture.git](https://github.com/kullanici-adin/AquaPosture.git)
+    git clone [https://github.com/ceycnk/AquaPosture.git](https://github.com/ceycnk/AquaPosture.git)
     ```
 2.  **Proje Klasörüne Gidin:**
     ```bash
