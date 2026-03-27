@@ -85,8 +85,21 @@
                     <p class="text-gray-500">Dik dur, para kazan, balıkları yaşat.</p>
                 </div>
 
-                <div class="text-8xl font-black text-gray-800 tracking-tighter mb-10 drop-shadow-sm font-mono">
+                <div class="text-8xl font-black text-gray-800 tracking-tighter mb-6 drop-shadow-sm font-mono">
                     <span id="timer-display">25:00</span>
+                </div>
+
+                <div id="time-selector-container" class="flex flex-col items-center gap-2 mb-8 w-full max-w-[200px]">
+                    <span class="text-sm font-extrabold text-blue-500 uppercase tracking-wider">Hedef Süre Limitiniz:</span>
+                    <select id="time-selector" class="w-full text-lg font-bold bg-white/80 border-2 border-blue-200 text-blue-700 rounded-xl px-4 py-2 outline-none cursor-pointer hover:bg-white focus:border-blue-400 transition-colors shadow-sm text-center">
+                        <option value="25">25 Dakika Onerilen</option>
+                        <option value="30">30 Dakika</option>
+                        <option value="45">45 Dakika</option>
+                        <option value="60">1 Saat</option>
+                        <option value="90">1.5 Saat</option>
+                        <option value="120">2 Saat</option>
+                        <option value="180">3 Saat</option>
+                    </select>
                 </div>
 
                 <div class="flex gap-4">
