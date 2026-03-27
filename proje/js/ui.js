@@ -138,8 +138,8 @@ const ui = {
             document.body.style.cursor = 'url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'48\' height=\'48\'><text y=\'38\' font-size=\'38\'>🧽</text></svg>") 24 24, auto';
         } else if (toolName === 'food') {
             this.elements.toolFood.classList.add('border-teal-500', 'bg-white');
-            // Fare imlecini yem kutusu emojisi yap
-            document.body.style.cursor = 'url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'48\' height=\'48\'><text y=\'38\' font-size=\'38\'>🥫</text></svg>") 24 24, auto';
+            // Fare imlecini yem kutusu (Tuzluk/Shaker) emojisi yap
+            document.body.style.cursor = 'url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'48\' height=\'48\'><text y=\'38\' font-size=\'38\'>🧂</text></svg>") 24 24, auto';
         }
     },
 
@@ -331,35 +331,6 @@ const ui = {
         ctx.arc(e.clientX, e.clientY, 80, 0, Math.PI*2);
         ctx.fill();
         
-        // Sabun Köpüğü (Emoji yerine evrensel CSS dairesi)
-        if (Math.random() > 0.6) { 
-            const bubble = document.createElement('div');
-            // CSS JIT sorunlarına karşı hardcode Inline Stiller
-            bubble.style.position = "absolute";
-            bubble.style.width = (Math.random() * 20 + 10) + "px";
-            bubble.style.height = bubble.style.width;
-            bubble.style.borderRadius = "50%";
-            bubble.style.backgroundColor = "rgba(255,255,255,0.3)";
-            bubble.style.border = "1px solid rgba(255,255,255,0.8)";
-            bubble.style.boxShadow = "inset 0 0 10px rgba(255,255,255,0.5)";
-            bubble.style.zIndex = "9999";
-            bubble.style.pointerEvents = "none";
-            
-            // Konumlandırma
-            bubble.style.left = (e.clientX - 20 + (Math.random()*40-20)) + "px";
-            bubble.style.top = (e.clientY - 20 + (Math.random()*40-20)) + "px";
-            bubble.style.transition = "top 1.5s ease-out, opacity 1.5s ease-out, transform 1.5s ease-out";
-            
-            document.getElementById('aquarium-bg').appendChild(bubble);
-            
-            requestAnimationFrame(() => {
-                bubble.style.top = (e.clientY - 150) + "px"; 
-                bubble.style.opacity = "0";
-                bubble.style.transform = "scale(1.5)";
-            });
-            setTimeout(() => bubble.remove(), 1500);
-        }
-        
         this.glassCleanProgress++;
         
         // Gercekci temizleme kontrolu: Acaba cam gercekten silindi mi? (Piksel taramasi)
@@ -425,14 +396,15 @@ const ui = {
         food.style.left = (x - size/2) + "px";
         food.style.top = y + "px"; 
         
-        food.style.transition = "top 3s linear, opacity 0.5s ease";
         bg.appendChild(food);
         
         const floorY = window.innerHeight + 50; // Ekranın en altı
         
-        requestAnimationFrame(() => {
+        // Tarayıcı çizimi güvenliği için minik bekleme (Animasyonun atlanmaması için)
+        setTimeout(() => {
+            food.style.transition = "top 3s linear, opacity 0.5s ease";
             food.style.top = floorY + "px"; 
-        });
+        }, 50);
         
         // Yemi havada (düşerken 1.5 saniye sonra bulunduğu noktada) yakalama mantığı
         // 3 saniyede floorY'ye varıyorsa; 1.5 saniyede yarısını kat eder.
