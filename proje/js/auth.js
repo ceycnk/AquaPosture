@@ -15,8 +15,8 @@ if (!firebase.apps.length) {
     firebase.initializeApp(firebaseConfig);
 }
 
-const auth = firebase.auth();
-const db = firebase.firestore();
+window.auth = firebase.auth();
+window.db = firebase.firestore();
 
 const authManager = {
     user: null,
@@ -24,7 +24,7 @@ const authManager = {
     
     init: function() {
         // Kullanıcı giriş/çıkış yaptığında otomatik tetiklenen dinleyici
-        auth.onAuthStateChanged((user) => {
+        window.auth.onAuthStateChanged((user) => {
             this.user = user;
             if (this.onAuthChange) {
                 this.onAuthChange(user);
@@ -37,7 +37,7 @@ const authManager = {
         ui.elements.loginBtn.textContent = "Giriş Yapılıyor...";
         ui.elements.loginBtn.disabled = true;
         
-        auth.signInWithPopup(provider)
+        window.auth.signInWithPopup(provider)
         .then((result) => {
             console.log("Sistem: Başarıyla giriş yapıldı:", result.user.displayName);
             ui.elements.loginBtn.textContent = "Google ile Giriş";
@@ -56,7 +56,7 @@ const authManager = {
     },
     
     logout: function() {
-        auth.signOut().then(() => {
+        window.auth.signOut().then(() => {
             console.log("Sistem: Başarıyla çıkış yapıldı.");
             // İsteğe bağlı, coinleri burada 0'layabiliriz veya kalmasını sağlayabiliriz.
         }).catch((error) => {

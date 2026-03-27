@@ -147,8 +147,8 @@ const ui = {
         
         activeFishes.forEach((fish, i) => {
             const el = document.createElement('div');
-            // Balıklara yüzme animasyonu ve rastgele pozisyon veriyoruz
-            el.className = "absolute text-6xl select-none transition-all duration-[4000ms] ease-in-out drop-shadow-lg";
+            // Balıklara yüzme animasyonu ve rastgele pozisyon veriyoruz (Balıkları devasa gösteriyoruz text-[100px])
+            el.className = `absolute text-[80px] md:text-[120px] select-none transition-all duration-[5000ms] ease-in-out drop-shadow-2xl z-20`;
             el.innerHTML = fish.emoji;
             
             // Başlangıç rotası
@@ -163,9 +163,25 @@ const ui = {
             setInterval(() => {
                 el.style.left = Math.floor(Math.random() * 80) + "%";
                 el.style.top = Math.floor(Math.random() * 80) + "%";
-            }, Math.floor(Math.random() * 3000) + 4000); // 4-7 saniyede bir yer değiştir
+            }, Math.floor(Math.random() * 4000) + 4000); // 4-8 saniyede bir yer değiştir
 
             container.appendChild(el);
         });
+    },
+
+    // Arkaplan su animasyonu
+    initBubbles: function() {
+        const bg = this.elements.aquariumBg;
+        for (let i = 0; i < 20; i++) {
+            const bubble = document.createElement('div');
+            bubble.className = "fish-bubble";
+            const size = Math.floor(Math.random() * 25) + 10 + "px"; // 10px to 35px
+            bubble.style.width = size;
+            bubble.style.height = size;
+            bubble.style.left = Math.floor(Math.random() * 100) + "%";
+            bubble.style.animationDuration = (Math.random() * 5 + 4) + "s"; // 4s to 9s
+            bubble.style.animationDelay = (Math.random() * 5) + "s";
+            bg.appendChild(bubble);
+        }
     }
 };

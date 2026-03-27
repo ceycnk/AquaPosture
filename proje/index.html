@@ -14,9 +14,10 @@
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js" crossorigin="anonymous"></script>
 </head>
 <body class="bg-teal-50 text-gray-800 font-sans overflow-hidden">
-    <div id="aquarium-bg" class="fixed inset-0 z-0 bg-blue-300 transition-all duration-700 ease-in-out">
+    <!-- Akvaryum Arka Plan Katmanı -->
+    <div id="aquarium-bg" class="fixed inset-0 z-0 bg-gradient-to-b from-cyan-400 via-blue-600 to-blue-900 transition-all duration-700 ease-in-out">
         <!-- Akvaryum Balıkları JS Tarafından Buraya Dinamik Doldurulacak -->
-        <div id="fish-container" class="absolute inset-0 w-full h-full pointer-events-none opacity-40"></div>
+        <div id="fish-container" class="absolute inset-0 w-full h-full pointer-events-none z-10"></div>
     </div>
 
     <div id="ui-layer" class="relative z-10 h-screen w-screen flex flex-col p-6 max-w-6xl mx-auto">

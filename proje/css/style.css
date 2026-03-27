@@ -10,8 +10,28 @@ body {
     transition: filter 0.8s ease-in-out, background-color 1s ease;
 }
 
-/* Kameranın tuvalinde (canvas) CSS ile ters çevirme, 
-cunku kamera normalde ayna etkisine sahip degilse kafa karıstırıcı olabilir (zaten index.html de scale-x-100 ekledik ama yedek css) */
+
+/* Kameranın tuvalinde (canvas) CSS ile ters çevirme */
 #output-canvas, #input-video {
     transform: scaleX(-1);
+}
+
+/* Balık Su Baloncukları Efekti */
+.fish-bubble {
+    position: absolute;
+    top: 105%;
+    border-radius: 50%;
+    animation: bubbleRise linear infinite;
+    pointer-events: none;
+    background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.1));
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 0 10px rgba(255,255,255,0.1);
+}
+
+@keyframes bubbleRise {
+    0% { transform: translate(0, 0) scale(0.6); opacity: 0; }
+    10% { opacity: 0.6; }
+    50% { transform: translate(15px, -50vh) scale(1); }
+    80% { opacity: 0.4; }
+    100% { transform: translate(-15px, -110vh) scale(1.2); opacity: 0; }
 }

@@ -9,6 +9,7 @@ const app = {
     
     init: function() {
         console.log("🌊 AquaPosture Başlatılıyor...");
+        ui.initBubbles(); // Akvaryum su kabarcığı animasyonlarını çalıştır
         
         // --- KAMERA ---
         const startCamBtn = document.getElementById('start-camera-btn');

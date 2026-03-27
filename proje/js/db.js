@@ -1,11 +1,10 @@
 // db.js - Firestore Veritabanı İşlemleri
 const dbManager = {
-    // db nesnesi auth.js içerisindeki firebase.firestore() tanımından beslenir.
     
     // Kullanıcı Giriş Yaptığında Veritabanını Kontrol/Kayıt Etme
     initUserDoc: async function(uid, displayName) {
         try {
-            const userRef = db.collection("users").doc(uid);
+            const userRef = window.db.collection("users").doc(uid);
             const doc = await userRef.get();
             
             if (!doc.exists) {
@@ -26,7 +25,7 @@ const dbManager = {
             }
         } catch (e) {
             console.error("Firestore initUserDoc hatası:", e);
-            alert("Veritabanı (Firestore) bağlantısı kurulamadı! Lütfen Firebase Console üzerinden 'Firestore Database' oluşturduğunuzdan emin olun.");
+            alert("Veritabanı bağlantı hatası: " + e.message);
             return null;
         }
     },
@@ -34,7 +33,7 @@ const dbManager = {
     // Kazanılan paraları anında kaydet
     updateCoins: async function(uid, newCoinTotal) {
         try {
-            await db.collection("users").doc(uid).update({
+            await window.db.collection("users").doc(uid).update({
                 coins: newCoinTotal
             });
             console.log(`Firestore: Coin güncellendi -> ${newCoinTotal}`);
@@ -51,7 +50,7 @@ const dbManager = {
             const newTotal = currentCoins - cost;
             const newFishes = [...currentFishes, newFishId];
             
-            await db.collection("users").doc(uid).update({
+            await window.db.collection("users").doc(uid).update({
                 coins: newTotal,
                 fishes: newFishes
             });
