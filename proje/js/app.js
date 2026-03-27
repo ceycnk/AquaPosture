@@ -1,7 +1,8 @@
 // app.js - Ana Uygulama Başlatıcısı ve Seans Yönetimi
 const app = {
     coins: 0,
-    goodPostureSeconds: 0,
+    sessionGoodPostureSeconds: 0,
+    sessionTargetMinutes: 25,
     sessionTimer: null,
     timeLeft: 25 * 60,
     isSessionActive: false,
@@ -119,9 +120,9 @@ const app = {
                     e.target.textContent = "Satın Alınıyor...";
                     e.target.disabled = true;
                     
-                    if (authManager.user && app.userData) {
+                    if (window.auth.currentUser && app.userData) {
                         const result = await dbManager.buyFish(
-                            authManager.user.uid, 
+                            window.auth.currentUser.uid, 
                             app.userData.fishes, 
                             app.coins, 
                             fishId, 
@@ -143,10 +144,34 @@ const app = {
                 }
             });
         }
+        
+        // --- SÜRE VE SONUÇ ---
+        if (ui.elements.timeSelector) {
+            ui.elements.timeSelector.addEventListener('change', (e) => {
+                if (!app.isSessionActive) {
+                    app.timeLeft = parseInt(e.target.value) * 60;
+                    app.updateTimeStr();
+                }
+            });
+            // Sayfa açılışında seçili değere göre süreyi yaz
+            app.timeLeft = parseInt(ui.elements.timeSelector.value) * 60;
+            app.updateTimeStr();
+        }
+
+        if (ui.elements.closeResultBtn) {
+            ui.elements.closeResultBtn.addEventListener('click', () => {
+                ui.hideResultModal();
+            });
+        }
     },
     
     startSession: function() {
         this.isSessionActive = true;
+        this.sessionTargetMinutes = parseInt(ui.elements.timeSelector.value);
+        this.timeLeft = this.sessionTargetMinutes * 60;
+        this.sessionGoodPostureSeconds = 0;
+        
+        if(ui.elements.timeSelectorContainer) ui.elements.timeSelectorContainer.classList.add('hidden');
         
         document.getElementById('start-session-btn').classList.add('hidden');
         document.getElementById('stop-session-btn').classList.remove('hidden');
@@ -162,26 +187,43 @@ const app = {
                 const percentage = ((totalDuration - this.timeLeft) / totalDuration) * 100;
                 progressBar.style.width = percentage + "%";
                 
-                // COIN EKLEME MANTIGI (5 Dakikada 1 Coin = 300 Sn)
+                // Dik duruş saniyelerini topla (CANLI VERMIYORUZ)
                 if (poseManager.isCalibrated && poseManager.isGoodPosture) {
-                    this.goodPostureSeconds++;
-                    
-                    if (this.goodPostureSeconds >= 300) {
-                        this.coins++;
-                        ui.updateCoins(this.coins);
-                        this.goodPostureSeconds = 0; // Bir sonraki 5dk için sıfırla
-                        
-                        // Veritabanını güncelle (Kullanıcı giriş yapmışsa)
-                        if (authManager.user && app.userData) {
-                             dbManager.updateCoins(authManager.user.uid, this.coins);
-                        }
-                    }
+                    this.sessionGoodPostureSeconds++;
                 }
             } else {
-                this.stopSession();
-                alert("Tebrikler! 25 Dakikalık Odaklanma Seansını Tamamladın!");
+                // SÜRE BİTİMİ (BAŞARI!)
+                clearInterval(this.sessionTimer);
+                this.finishSessionSuccessfully();
             }
         }, 1000);
+    },
+    
+    finishSessionSuccessfully: function() {
+        this.isSessionActive = false;
+        
+        document.getElementById('start-session-btn').classList.remove('hidden');
+        document.getElementById('stop-session-btn').classList.add('hidden');
+        if(ui.elements.timeSelectorContainer) ui.elements.timeSelectorContainer.classList.remove('hidden');
+        document.getElementById('session-progress').style.width = "0%";
+        
+        this.timeLeft = parseInt(ui.elements.timeSelector.value) * 60;
+        this.updateTimeStr();
+        
+        // ÖDÜL KAZANIMI (Her 300 saniye (5 Dk) dik duruş için 1 Coin)
+        const earnedCoins = Math.floor(this.sessionGoodPostureSeconds / 300);
+        
+        ui.showResultModal(this.sessionTargetMinutes, this.sessionGoodPostureSeconds, earnedCoins);
+        
+        if (earnedCoins > 0) {
+            this.coins += earnedCoins;
+            ui.updateCoins(this.coins);
+            
+            // Veritabanını Sonuç İle Güncelle
+            if (window.auth.currentUser && this.userData) {
+                 dbManager.updateCoins(window.auth.currentUser.uid, this.coins);
+            }
+        }
     },
     
     stopSession: function() {
@@ -190,10 +232,14 @@ const app = {
         
         document.getElementById('start-session-btn').classList.remove('hidden');
         document.getElementById('stop-session-btn').classList.add('hidden');
+        if(ui.elements.timeSelectorContainer) ui.elements.timeSelectorContainer.classList.remove('hidden');
         
-        this.timeLeft = 25 * 60;
+        this.timeLeft = parseInt(ui.elements.timeSelector.value) * 60;
         this.updateTimeStr();
         document.getElementById('session-progress').style.width = "0%";
+        
+        // Erken Çıkış (Ceza: Coin verilmez, saniyeler yanar)
+        alert("Seansı erken bitirdiğiniz veya kameranızı kapadığınız için maalesef puan kazanamadınız. Biriken saniyeleriniz yandı!");
     },
     
     updateTimeStr: function() {

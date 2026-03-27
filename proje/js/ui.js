@@ -31,7 +31,15 @@ const ui = {
         marketModal: document.getElementById('market-modal'),
         closeMarketBtn: document.getElementById('close-market-btn'),
         fishShopList: document.getElementById('fish-shop-list'),
-        fishContainer: document.getElementById('fish-container')
+        fishContainer: document.getElementById('fish-container'),
+        // Session & Result
+        timeSelectorContainer: document.getElementById('time-selector-container'),
+        timeSelector: document.getElementById('time-selector'),
+        resultModal: document.getElementById('result-modal'),
+        resultTotalTime: document.getElementById('result-total-time'),
+        resultGoodTime: document.getElementById('result-good-time'),
+        resultCoins: document.getElementById('result-coins'),
+        closeResultBtn: document.getElementById('close-result-btn')
     },
     
     updateTimer: function(timeStr) {
@@ -112,6 +120,27 @@ const ui = {
                 this.elements.marketModal.classList.add('hidden');
             }, 200);
         }
+    },
+    
+    showResultModal: function(totalMins, goodSecs, earnedCoins) {
+        const goodMins = Math.floor(goodSecs / 60);
+        this.elements.resultTotalTime.textContent = totalMins + " Dk";
+        this.elements.resultGoodTime.textContent = goodMins + " Dk";
+        this.elements.resultCoins.textContent = earnedCoins;
+        
+        this.elements.resultModal.classList.remove('hidden');
+        setTimeout(() => {
+            this.elements.resultModal.children[0].classList.remove('scale-95');
+            this.elements.resultModal.children[0].classList.add('scale-100');
+        }, 10);
+    },
+    
+    hideResultModal: function() {
+        this.elements.resultModal.children[0].classList.remove('scale-100');
+        this.elements.resultModal.children[0].classList.add('scale-95');
+        setTimeout(() => {
+            this.elements.resultModal.classList.add('hidden');
+        }, 200);
     },
 
     renderShop: function(userCoins, userFishes) {

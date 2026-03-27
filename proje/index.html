@@ -115,6 +115,35 @@
         </div>
     </div>
 
+    <!-- Sonuç Modalı (Seans bittiğinde tebrikler için açılır) -->
+    <div id="result-modal" class="fixed inset-0 bg-black/60 z-[100] hidden flex items-center justify-center backdrop-blur-md transition-all text-gray-800">
+        <div class="bg-white rounded-3xl w-full max-w-sm p-8 shadow-2xl flex flex-col items-center text-center transform scale-95 transition-transform">
+            <div class="text-7xl mb-4 animate-bounce">🎉</div>
+            <h2 class="text-3xl font-black text-blue-800 mb-2">Tebrikler!</h2>
+            <p class="text-gray-600 font-medium mb-6">Odaklanma seansını başarıyla tamamladın.</p>
+            
+            <div class="w-full bg-blue-50 rounded-2xl p-4 mb-6 border border-blue-100">
+                <div class="flex justify-between mb-2">
+                    <span class="font-bold text-gray-500">Toplam Süre:</span>
+                    <span id="result-total-time" class="font-black text-blue-700">25 Dk</span>
+                </div>
+                <div class="flex justify-between mb-2">
+                    <span class="font-bold text-gray-500">Dik Duruş:</span>
+                    <span id="result-good-time" class="font-black text-emerald-600">20 Dk</span>
+                </div>
+                <hr class="my-2 border-blue-100">
+                <div class="flex justify-between items-center mt-2">
+                    <span class="font-bold text-gray-500">Kazanılan:</span>
+                    <span class="font-black text-2xl text-yellow-500"><span id="result-coins">4</span> 🪙</span>
+                </div>
+            </div>
+            
+            <button id="close-result-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition-all shadow-md active:scale-95">
+                Müthiş! Kapat
+            </button>
+        </div>
+    </div>
+
     <!-- Firebase (v9 Compat) CDN -->
     <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-auth-compat.js"></script>
