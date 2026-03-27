@@ -166,6 +166,12 @@ const app = {
     },
     
     startSession: function() {
+        // Kamera açık değilse veya kalibrasyon yapılmamışsa uyarı ver
+        if (!poseManager || !poseManager.isCalibrated) {
+            const proceedInfo = confirm("⚠️ Gözetleme Kulesi Aktif Değil!\n\nOdaklanmak için kronometremizi kamerasız da kullanabilirsiniz ancak yapay zeka duruşunuzu kontrol edemeyeceği için bu seanstan AquaCoin kazanamazsınız.\n\nYine de kamerasız başlatılsın mı?");
+            if (!proceedInfo) return; // "İptal" derse seansı başlatma
+        }
+
         this.isSessionActive = true;
         this.sessionTargetMinutes = parseInt(ui.elements.timeSelector.value);
         this.timeLeft = this.sessionTargetMinutes * 60;
