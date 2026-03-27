@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AquaPosture | Yapay Zeka Odaklı Duruş Uygulaması</title>
+    
+    <!-- Tailwind CSS (CDN - Kurulumsuz) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Özel CSS (Örn: akvaryum animasyonları) -->
+    <link rel="stylesheet" href="css/style.css">
+    
+    <!-- Google MediaPipe Pose (Tarayıcı İçi AI, Sunucuya Veri Gitmez) -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js" crossorigin="anonymous"></script>
+</head>
+<body class="bg-teal-50 text-gray-800 font-sans overflow-hidden">
+    <!-- Akvaryum Arka Plan Katmanı -->
+    <div id="aquarium-bg" class="fixed inset-0 z-0 bg-blue-300 transition-all duration-700 ease-in-out">
+        <div class="absolute inset-0 flex items-center justify-around opacity-40 text-6xl select-none" style="pointer-events: none;">
+            <div class="animate-pulse">🐠</div> 
+            <div class="animate-bounce">🐟</div>
+            <div class="animate-pulse">🐡</div>
+        </div>
+    </div>
+
+    <!-- UI (Kullanıcı Arayüzü) -->
+    <div id="ui-layer" class="relative z-10 h-screen w-screen flex flex-col p-6 max-w-6xl mx-auto">
+        
+        <!-- Üst Menü / Navbar -->
+        <header class="flex justify-between items-center bg-white/80 backdrop-blur-md p-4 rounded-2xl shadow-sm border border-white/50">
+            <h1 class="text-3xl font-extrabold text-blue-700 tracking-tight">🌊 Aqua<span class="text-teal-500">Posture</span></h1>
+            <div class="flex items-center gap-4">
+                <div class="bg-yellow-50 border border-yellow-200 text-yellow-700 px-4 py-2 rounded-xl font-bold flex gap-2 items-center shadow-inner">
+                    <span>🪙 AquaCoin:</span>
+                    <span id="coin-counter" class="text-lg">0</span>
+                </div>
+                <!-- Auth Firebase geçici butonu -->
+                <button id="login-btn" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl font-semibold transition-all shadow-md active:scale-95">
+                    Google ile Giriş
+                </button>
+            </div>
+        </header>
+
+        <!-- Ana Ortam -->
+        <main class="flex-1 flex gap-8 mt-6">
+            
+            <!-- Sol Panel: AI Kamera & Postür İzleme -->
+            <section class="w-1/3 bg-white/80 backdrop-blur-md p-5 rounded-2xl shadow-sm border border-white/50 flex flex-col">
+                <div class="flex justify-between items-end mb-3">
+                    <h2 class="text-lg font-bold text-gray-700">Gözetleme Kulesi</h2>
+                    <span class="text-xs text-gray-400">FPS: 30</span>
+                </div>
+                
+                <div class="relative w-full aspect-[4/3] bg-gray-900 rounded-xl overflow-hidden flex-1 shadow-inner border-2 border-gray-200">
+                    <video id="input-video" class="absolute inset-0 w-full h-full object-cover transform -scale-x-100 hidden" autoplay playsinline></video>
+                    <!-- MediaPipe Noktalarını Çizeceğimiz Tuval -->
+                    <canvas id="output-canvas" class="absolute inset-0 w-full h-full transform -scale-x-100 z-10"></canvas>
+                    
+                    <!-- Kamera İzni Yok/Bekleniyor UI Katmanı -->
+                    <div id="camera-overlay" class="absolute inset-0 bg-gray-900/90 flex items-center justify-center z-20 flex-col gap-3 p-4 text-center">
+                        <div class="text-3xl">📷</div>
+                        <h3 class="text-white font-bold">Kameranıza Bağlanın</h3>
+                        <p class="text-xs text-gray-300">Gizlilik Bildirimi: Görüntü sunucuya gitmez, tarayıcıda işlenir.</p>
+                        <button id="start-camera-btn" class="bg-teal-500 hover:bg-teal-600 text-white px-5 py-2 mt-2 rounded-lg font-bold transition shadow-lg w-full">
+                            Kalibrasyonu Başlat
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="mt-4 p-4 bg-gray-100/80 rounded-xl flex justify-between items-center shadow-inner">
+                    <span class="font-semibold text-sm text-gray-500">Anlık Durum:</span>
+                    <span id="posture-status" class="font-extrabold text-blue-500 text-sm">Bekleniyor...</span>
+                </div>
+            </section>
+
+            <!-- Sağ Panel: Odaklanma Seansı ve Sayaç -->
+            <section class="flex-1 bg-white/80 backdrop-blur-md p-8 rounded-2xl shadow-sm border border-white/50 flex flex-col items-center justify-center relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-full h-2 bg-gray-200">
+                    <div id="session-progress" class="h-full bg-teal-400 w-0 transition-all duration-1000 linear"></div>
+                </div>
+
+                <div class="text-center mb-8">
+                    <h2 class="text-2xl font-bold text-gray-700">Seans Süresi</h2>
+                    <p class="text-gray-500">Dik dur, para kazan, balıkları yaşat.</p>
+                </div>
+
+                <div class="text-8xl font-black text-gray-800 tracking-tighter mb-10 drop-shadow-sm font-mono">
+                    <span id="timer-display">25:00</span>
+                </div>
+
+                <div class="flex gap-4">
+                    <button id="start-session-btn" class="bg-emerald-500 hover:bg-emerald-600 text-white px-10 py-4 rounded-2xl font-bold text-xl shadow-lg shadow-emerald-500/30 transition-all hover:-translate-y-1 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
+                        Seansı Başlat
+                    </button>
+                    <button id="stop-session-btn" class="bg-rose-500 hover:bg-rose-600 text-white px-10 py-4 rounded-2xl font-bold text-xl shadow-lg shadow-rose-500/30 transition-all hover:-translate-y-1 active:scale-95 hidden">
+                        Seansı Bitir
+                    </button>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Vanilla JS Modülleri (ES6 Modules) -->
+    <script type="module" src="js/ui.js"></script>
+    <script type="module" src="js/auth.js"></script>
+    <script type="module" src="js/pose.js"></script>
+    <script type="module" src="js/app.js"></script>
+</body>
+</html>
