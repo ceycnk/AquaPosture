@@ -20,11 +20,19 @@
         <div id="fish-container" class="absolute inset-0 w-full h-full pointer-events-none z-10"></div>
     </div>
 
-    <div id="ui-layer" class="relative z-10 h-screen w-screen flex flex-col p-6 max-w-6xl mx-auto">
+    <!-- Tam ekran Akvaryum Modu Çıkış Butonu (Sadece Akvaryum İzlerken Görünür) -->
+    <button id="exit-aquarium-btn" class="fixed bottom-10 left-1/2 transform -translate-x-1/2 z-[60] bg-teal-800/80 hover:bg-teal-700 backdrop-blur-xl text-white px-8 py-4 rounded-full font-black text-xl shadow-2xl transition-all hidden hover:scale-105 active:scale-95 flex items-center gap-3 border border-teal-500/50">
+        👀 Panoya Geri Dön
+    </button>
+
+    <div id="ui-layer" class="relative z-10 h-screen w-screen flex flex-col p-6 max-w-6xl mx-auto transition-all duration-700 ease-in-out">
         
         <header class="flex justify-between items-center bg-white/80 backdrop-blur-md p-4 rounded-2xl shadow-sm border border-white/50">
             <h1 class="text-3xl font-extrabold text-blue-700 tracking-tight">🌊 Aqua<span class="text-teal-500">Posture</span></h1>
             <div class="flex items-center gap-4">
+                <button id="view-aquarium-btn" class="hidden bg-sky-500 hover:bg-sky-600 text-white px-4 py-2 rounded-xl font-bold transition-all shadow-md active:scale-95 flex items-center gap-2">
+                    🌊 Akvaryumum
+                </button>
                 <button id="market-btn" class="hidden bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-xl font-bold transition-all shadow-md active:scale-95 flex items-center gap-2">
                     🛒 Market
                 </button>

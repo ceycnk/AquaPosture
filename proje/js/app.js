@@ -72,6 +72,7 @@ const app = {
                 // UI Güncelleme
                 ui.setUserProfile(user.displayName, user.photoURL);
                 if(ui.elements.marketBtn) ui.elements.marketBtn.classList.remove('hidden');
+                if(ui.elements.viewAquariumBtn) ui.elements.viewAquariumBtn.classList.remove('hidden');
                 
                 // Veritabanı (Firestore) Yükleme
                 const data = await dbManager.initUserDoc(user.uid, user.displayName);
@@ -85,6 +86,7 @@ const app = {
                 // Çıkış Durumu
                 ui.setLoginState();
                 if(ui.elements.marketBtn) ui.elements.marketBtn.classList.add('hidden');
+                if(ui.elements.viewAquariumBtn) ui.elements.viewAquariumBtn.classList.add('hidden');
                 app.userData = null;
                 app.coins = 0;
                 ui.updateCoins(0);
@@ -94,7 +96,14 @@ const app = {
         
         authManager.init();
 
-        // --- MARKET EVENTLERI ---
+        // --- AKVARYUM VE MARKET EVENTLERI ---
+        if(ui.elements.viewAquariumBtn) {
+            ui.elements.viewAquariumBtn.addEventListener('click', () => ui.toggleAquariumMode(true));
+        }
+        if(ui.elements.exitAquariumBtn) {
+            ui.elements.exitAquariumBtn.addEventListener('click', () => ui.toggleAquariumMode(false));
+        }
+
         if(ui.elements.marketBtn) {
             ui.elements.marketBtn.addEventListener('click', () => {
                 if(app.userData) {

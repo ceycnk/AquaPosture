@@ -11,6 +11,7 @@ window.FISH_CATALOG = [
 
 const ui = {
     elements: {
+        uiLayer: document.getElementById('ui-layer'),
         timerDisplay: document.getElementById('timer-display'),
         coinCounter: document.getElementById('coin-counter'),
         postureStatus: document.getElementById('posture-status'),
@@ -26,7 +27,9 @@ const ui = {
         userName: document.getElementById('user-name'),
         userAvatar: document.getElementById('user-avatar'),
         logoutBtn: document.getElementById('logout-btn'),
-        // Market UI
+        // Market & Aquarium UI
+        viewAquariumBtn: document.getElementById('view-aquarium-btn'),
+        exitAquariumBtn: document.getElementById('exit-aquarium-btn'),
         marketBtn: document.getElementById('market-btn'),
         marketModal: document.getElementById('market-modal'),
         closeMarketBtn: document.getElementById('close-market-btn'),
@@ -104,6 +107,18 @@ const ui = {
     },
 
     // --- MARKET VE AKVARYUM GÖRSELLERİ ---
+
+    toggleAquariumMode: function(isAquariumMode) {
+        if (isAquariumMode) {
+            // Arayüzü gizle, sadece akvaryum kalsın
+            this.elements.uiLayer.classList.add('opacity-0', 'scale-110', 'pointer-events-none');
+            this.elements.exitAquariumBtn.classList.remove('hidden');
+        } else {
+            // Arayüzü geri getir
+            this.elements.uiLayer.classList.remove('opacity-0', 'scale-110', 'pointer-events-none');
+            this.elements.exitAquariumBtn.classList.add('hidden');
+        }
+    },
 
     toggleMarket: function(show) {
         if(show) {
