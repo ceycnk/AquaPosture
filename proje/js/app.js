@@ -1,6 +1,7 @@
 // app.js - Ana Uygulama Başlatıcısı ve Seans Yönetimi
 const app = {
     coins: 0,
+    goodPostureSeconds: 0,
     sessionTimer: null,
     timeLeft: 25 * 60,
     isSessionActive: false,
@@ -59,8 +60,13 @@ const app = {
                 progressBar.style.width = percentage + "%";
                 
                 if (poseManager.isCalibrated && poseManager.isGoodPosture) {
-                    this.coins++;
-                    ui.updateCoins(this.coins);
+                    this.goodPostureSeconds++;
+                    // 300 saniye = 5 dakika
+                    if (this.goodPostureSeconds >= 300) {
+                        this.coins++;
+                        ui.updateCoins(this.coins);
+                        this.goodPostureSeconds = 0;
+                    }
                 }
             } else {
                 this.stopSession();
