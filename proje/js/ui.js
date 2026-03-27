@@ -9,7 +9,13 @@ const ui = {
         startCameraBtn: document.getElementById('start-camera-btn'),
         toggleCameraBtn: document.getElementById('toggle-camera-btn'),
         inputVideo: document.getElementById('input-video'),
-        outputCanvas: document.getElementById('output-canvas')
+        outputCanvas: document.getElementById('output-canvas'),
+        // Auth UI
+        loginBtn: document.getElementById('login-btn'),
+        userInfo: document.getElementById('user-info'),
+        userName: document.getElementById('user-name'),
+        userAvatar: document.getElementById('user-avatar'),
+        logoutBtn: document.getElementById('logout-btn')
     },
     
     updateTimer: function(timeStr) {
@@ -57,5 +63,19 @@ const ui = {
         
         const ctx = this.elements.outputCanvas.getContext('2d');
         ctx.clearRect(0, 0, this.elements.outputCanvas.width, this.elements.outputCanvas.height);
+    },
+    
+    setUserProfile: function(name, photoUrl) {
+        this.elements.loginBtn.classList.add('hidden');
+        this.elements.userInfo.classList.remove('hidden');
+        this.elements.userName.textContent = name;
+        this.elements.userAvatar.src = photoUrl || 'https://via.placeholder.com/32';
+    },
+    
+    setLoginState: function() {
+        this.elements.loginBtn.classList.remove('hidden');
+        this.elements.userInfo.classList.add('hidden');
+        this.elements.userName.textContent = "";
+        this.elements.userAvatar.src = "";
     }
 };

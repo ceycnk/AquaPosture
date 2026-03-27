@@ -51,11 +51,25 @@ const app = {
         if(stopSessionBtn) stopSessionBtn.addEventListener('click', () => this.stopSession());
         
         const loginBtn = document.getElementById('login-btn');
+        const logoutBtn = document.getElementById('logout-btn');
+
         if(loginBtn) loginBtn.addEventListener('click', () => authManager.loginWithGoogle());
+        if(logoutBtn) logoutBtn.addEventListener('click', () => authManager.logout());
         
         poseManager.onPostureChange = (isGood) => {
             ui.setPostureState(isGood);
         };
+        
+        // Firebase Auth Tetikleyicisi
+        authManager.onAuthChange = (user) => {
+            if (user) {
+                ui.setUserProfile(user.displayName, user.photoURL);
+            } else {
+                ui.setLoginState();
+            }
+        };
+        
+        authManager.init();
     },
     
     startSession: function() {
