@@ -1,107 +1,144 @@
 <!-- ... -->
 <!DOCTYPE html>
 <html lang="tr">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AquaPosture | Yapay Zeka Odaklı Duruş Uygulaması</title>
-    
+
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="css/style.css">
-    
+
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"
+        crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js" crossorigin="anonymous"></script>
 </head>
+
 <body class="bg-teal-50 text-gray-800 font-sans overflow-hidden">
     <!-- Akvaryum Arka Plan Katmanı -->
-    <div id="aquarium-bg" class="fixed inset-0 z-0 bg-gradient-to-b from-cyan-400 via-blue-600 to-blue-900 transition-all duration-700 ease-in-out">
+    <div id="aquarium-bg"
+        class="fixed inset-0 z-0 bg-gradient-to-b from-cyan-400 via-blue-600 to-blue-900 transition-all duration-700 ease-in-out">
         <!-- Akvaryum Balıkları JS Tarafından Buraya Dinamik Doldurulacak -->
         <div id="fish-container" class="absolute inset-0 w-full h-full pointer-events-none z-10"></div>
-        
+
         <!-- Yosunlu (Kirli) Cam Canvas Katmanı -->
         <canvas id="dirty-glass" class="absolute inset-0 z-30 hidden pointer-events-none"></canvas>
 
         <!-- Dekoratif Mercan ve Deniz Tabanı (Gerçekçi Arkaplan) -->
-        <div id="corals-layer" class="absolute bottom-0 w-full h-[55vh] pointer-events-none z-[5] bg-[url('https://images.unsplash.com/photo-1546026423-cc4642628d2b?q=80&w=2000&auto=format&fit=crop')] bg-cover bg-bottom opacity-40 mix-blend-overlay" style="mask-image: linear-gradient(to top, black, transparent); -webkit-mask-image: linear-gradient(to top, black, transparent);"></div>
+        <div id="corals-layer"
+            class="absolute bottom-0 w-full h-[55vh] pointer-events-none z-[5] bg-[url('https://images.unsplash.com/photo-1546026423-cc4642628d2b?q=80&w=2000&auto=format&fit=crop')] bg-cover bg-bottom opacity-40 mix-blend-overlay"
+            style="mask-image: linear-gradient(to top, black, transparent); -webkit-mask-image: linear-gradient(to top, black, transparent);">
+        </div>
     </div>
 
     <!-- Tam ekran Akvaryum Modu Çıkış Butonu (Sadece Akvaryum İzlerken Görünür) -->
-    <button id="exit-aquarium-btn" class="fixed bottom-10 left-1/2 transform -translate-x-1/2 z-[60] bg-teal-800/80 hover:bg-teal-700 backdrop-blur-xl text-white px-8 py-4 rounded-full font-black text-xl shadow-2xl transition-all hidden hover:scale-105 active:scale-95 flex items-center gap-3 border border-teal-500/50">
+    <button id="exit-aquarium-btn"
+        class="fixed bottom-10 left-1/2 transform -translate-x-1/2 z-[60] bg-teal-800/80 hover:bg-teal-700 backdrop-blur-xl text-white px-8 py-4 rounded-full font-black text-xl shadow-2xl transition-all hidden hover:scale-105 active:scale-95 flex items-center gap-3 border border-teal-500/50">
         👀 Panoya Geri Dön
     </button>
-    
+
     <!-- Akvaryum Araçları Menüsü -->
-    <div id="aquarium-tools" class="hidden fixed right-6 top-1/2 transform -translate-y-1/2 z-[70] flex flex-col gap-5 bg-white/20 backdrop-blur-xl p-3 rounded-3xl border border-white/30 shadow-2xl">
-        <button id="tool-sponge" class="group w-16 h-16 bg-white/50 hover:bg-white/90 text-4xl rounded-2xl shadow-md transition-all flex items-center justify-center border-[3px] border-transparent active:scale-95 relative" title="Sünger (Camı Temizle)">
+    <div id="aquarium-tools"
+        class="hidden fixed right-6 top-1/2 transform -translate-y-1/2 z-[70] flex flex-col gap-5 bg-white/20 backdrop-blur-xl p-3 rounded-3xl border border-white/30 shadow-2xl">
+        <button id="tool-sponge"
+            class="group w-16 h-16 bg-white/50 hover:bg-white/90 text-4xl rounded-2xl shadow-md transition-all flex items-center justify-center border-[3px] border-transparent active:scale-95 relative"
+            title="Sünger (Camı Temizle)">
             🧽
-            <span class="absolute right-20 bg-gray-800 text-white text-sm font-bold px-3 py-2 rounded-xl opacity-0 group-hover:opacity-100 whitespace-nowrap pointer-events-none transition-opacity">🧼 Camı Temizle</span>
+            <span
+                class="absolute right-20 bg-gray-800 text-white text-sm font-bold px-3 py-2 rounded-xl opacity-0 group-hover:opacity-100 whitespace-nowrap pointer-events-none transition-opacity">🧼
+                Camı Temizle</span>
         </button>
-        <button id="tool-food" class="group w-16 h-16 bg-white/50 hover:bg-white/90 text-4xl rounded-2xl shadow-md transition-all flex items-center justify-center border-[3px] border-transparent active:scale-95 relative" title="Yem At">
-            🧂
-            <span class="absolute right-20 bg-gray-800 text-white text-sm font-bold px-3 py-2 rounded-xl opacity-0 group-hover:opacity-100 whitespace-nowrap pointer-events-none transition-opacity">🐟 Yemi Serp</span>
+        <button id="tool-food"
+            class="group w-16 h-16 bg-white/50 hover:bg-white/90 text-4xl rounded-2xl shadow-md transition-all flex items-center justify-center border-[3px] border-transparent active:scale-95 relative"
+            title="Yem At">
+            🫘
+            <span
+                class="absolute right-20 bg-gray-800 text-white text-sm font-bold px-3 py-2 rounded-xl opacity-0 group-hover:opacity-100 whitespace-nowrap pointer-events-none transition-opacity">🐟
+                Yemi Serp</span>
         </button>
     </div>
 
-    <div id="ui-layer" class="relative z-10 h-screen w-screen flex flex-col p-6 max-w-6xl mx-auto transition-all duration-700 ease-in-out">
-        
-        <header class="flex justify-between items-center bg-white/80 backdrop-blur-md p-4 rounded-2xl shadow-sm border border-white/50">
-            <h1 class="text-3xl font-extrabold text-blue-700 tracking-tight">🌊 Aqua<span class="text-teal-500">Posture</span></h1>
-            <div class="flex items-center gap-4">
-                <button id="view-aquarium-btn" class="hidden bg-sky-500 hover:bg-sky-600 text-white px-4 py-2 rounded-xl font-bold transition-all shadow-md active:scale-95 flex items-center gap-2">
+    <div id="ui-layer"
+        class="relative z-10 h-screen w-screen flex flex-col p-6 max-w-6xl mx-auto transition-all duration-700 ease-in-out">
+
+        <header
+            class="flex flex-col md:flex-row justify-between items-center gap-4 md:gap-0 bg-white/80 backdrop-blur-md p-4 rounded-2xl shadow-sm border border-white/50">
+            <h1 class="text-3xl font-extrabold text-blue-700 tracking-tight">🌊 Aqua<span
+                    class="text-teal-500">Posture</span></h1>
+            <div class="flex flex-wrap items-center justify-center gap-4">
+                <button id="view-aquarium-btn"
+                    class="hidden bg-sky-500 hover:bg-sky-600 text-white px-4 py-2 rounded-xl font-bold transition-all shadow-md active:scale-95 flex items-center gap-2">
                     🌊 Akvaryumum
                 </button>
-                <button id="market-btn" class="hidden bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-xl font-bold transition-all shadow-md active:scale-95 flex items-center gap-2">
+                <button id="market-btn"
+                    class="hidden bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-xl font-bold transition-all shadow-md active:scale-95 flex items-center gap-2">
                     🛒 Market
                 </button>
-                <div class="bg-yellow-50 border border-yellow-200 text-yellow-700 px-4 py-2 rounded-xl font-bold flex gap-2 items-center shadow-inner">
+                <div
+                    class="bg-yellow-50 border border-yellow-200 text-yellow-700 px-4 py-2 rounded-xl font-bold flex gap-2 items-center shadow-inner">
                     <span>🪙 AquaCoin:</span>
                     <span id="coin-counter" class="text-lg">0</span>
                 </div>
-                <button id="login-btn" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl font-semibold transition-all shadow-md active:scale-95">
+                <button id="login-btn"
+                    class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl font-semibold transition-all shadow-md active:scale-95">
                     Google ile Giriş
                 </button>
                 <!-- Giriş yaptıktan sonra görünecek kullanıcı profil alanı -->
-                <div id="user-info" class="hidden flex items-center gap-2 bg-blue-50 px-3 py-1 rounded-xl border border-blue-200 shadow-sm">
+                <div id="user-info"
+                    class="hidden flex items-center gap-2 bg-blue-50 px-3 py-1 rounded-xl border border-blue-200 shadow-sm">
                     <img id="user-avatar" src="" alt="Avatar" class="w-8 h-8 rounded-full border border-blue-300">
                     <span id="user-name" class="font-bold text-sm text-blue-800">İsim</span>
-                    <button id="logout-btn" class="text-xs text-rose-500 hover:text-rose-700 font-bold ml-2 transition">Çıkış</button>
+                    <button id="logout-btn"
+                        class="text-xs text-rose-500 hover:text-rose-700 font-bold ml-2 transition">Çıkış</button>
                 </div>
             </div>
         </header>
 
-        <main class="flex-1 flex gap-8 mt-6">
-            
-            <section class="w-1/3 bg-white/80 backdrop-blur-md p-5 rounded-2xl shadow-sm border border-white/50 flex flex-col">
+        <main
+            class="flex-1 flex flex-col md:flex-row gap-6 md:gap-8 mt-6 overflow-y-auto md:overflow-visible pb-10 md:pb-0">
+
+            <section
+                class="w-full md:w-1/3 shrink-0 bg-white/80 backdrop-blur-md p-5 rounded-2xl shadow-sm border border-white/50 flex flex-col">
                 <div class="flex justify-between items-end mb-3">
                     <h2 class="text-lg font-bold text-gray-700">Gözetleme Kulesi</h2>
                     <span class="text-xs text-gray-400">FPS: 30</span>
                 </div>
-                
-                <div class="relative w-full aspect-[4/3] bg-gray-900 rounded-xl overflow-hidden flex-1 shadow-inner border-2 border-gray-200">
-                    <video id="input-video" class="absolute inset-0 w-full h-full object-cover transform -scale-x-100 hidden" autoplay playsinline></video>
-                    <canvas id="output-canvas" class="absolute inset-0 w-full h-full transform -scale-x-100 z-10"></canvas>
-                    
-                    <div id="camera-overlay" class="absolute inset-0 bg-gray-900/90 flex items-center justify-center z-20 flex-col gap-3 p-4 text-center">
+
+                <div
+                    class="relative w-full aspect-[4/3] bg-gray-900 rounded-xl overflow-hidden flex-1 shadow-inner border-2 border-gray-200">
+                    <video id="input-video"
+                        class="absolute inset-0 w-full h-full object-cover transform -scale-x-100 hidden" autoplay
+                        playsinline></video>
+                    <canvas id="output-canvas"
+                        class="absolute inset-0 w-full h-full transform -scale-x-100 z-10"></canvas>
+
+                    <div id="camera-overlay"
+                        class="absolute inset-0 bg-gray-900/90 flex items-center justify-center z-20 flex-col gap-3 p-4 text-center">
                         <div class="text-3xl">📷</div>
                         <h3 class="text-white font-bold">Kameranıza Bağlanın</h3>
-                        <p class="text-xs text-gray-300">Gizlilik Bildirimi: Görüntü sunucuya gitmez, tarayıcıda işlenir.</p>
-                        <button id="start-camera-btn" class="bg-teal-500 hover:bg-teal-600 text-white px-5 py-2 mt-2 rounded-lg font-bold transition shadow-lg w-full">
+                        <p class="text-xs text-gray-300">Gizlilik Bildirimi: Görüntü sunucuya gitmez, tarayıcıda
+                            işlenir.</p>
+                        <button id="start-camera-btn"
+                            class="bg-teal-500 hover:bg-teal-600 text-white px-5 py-2 mt-2 rounded-lg font-bold transition shadow-lg w-full">
                             Kalibrasyonu Başlat
                         </button>
                     </div>
                 </div>
-                
+
                 <div class="mt-4 p-4 bg-gray-100/80 rounded-xl flex justify-between items-center shadow-inner">
                     <div>
                         <span class="font-semibold text-sm text-gray-500">Durum:</span>
                         <span id="posture-status" class="font-extrabold text-blue-500 text-sm ml-2">Bekleniyor...</span>
                     </div>
-                    <button id="toggle-camera-btn" class="hidden bg-rose-100 hover:bg-rose-200 text-rose-700 px-3 py-1 rounded-md text-xs font-bold transition">Kapat</button>
+                    <button id="toggle-camera-btn"
+                        class="hidden bg-rose-100 hover:bg-rose-200 text-rose-700 px-3 py-1 rounded-md text-xs font-bold transition">Kapat</button>
                 </div>
             </section>
 
-            <section class="flex-1 bg-white/80 backdrop-blur-md p-8 rounded-2xl shadow-sm border border-white/50 flex flex-col items-center justify-center relative overflow-hidden">
+            <section
+                class="flex-1 bg-white/80 backdrop-blur-md p-8 rounded-2xl shadow-sm border border-white/50 flex flex-col items-center justify-center relative overflow-hidden">
                 <div class="absolute top-0 left-0 w-full h-2 bg-gray-200">
                     <div id="session-progress" class="h-full bg-teal-400 w-0 transition-all duration-1000 linear"></div>
                 </div>
@@ -116,23 +153,29 @@
                 </div>
 
                 <div id="time-selector-container" class="flex flex-col items-center gap-2 mb-8 w-full max-w-[200px]">
-                    <span class="text-sm font-extrabold text-blue-500 uppercase tracking-wider">Hedef Süre Limitiniz:</span>
-                    <select id="time-selector" class="w-full text-lg font-bold bg-white/80 border-2 border-blue-200 text-blue-700 rounded-xl px-4 py-2 outline-none cursor-pointer hover:bg-white focus:border-blue-400 transition-colors shadow-sm text-center">
-                        <option value="25">25 Dakika Onerilen</option>
+                    <span class="text-sm font-extrabold text-blue-500 uppercase tracking-wider">Hedef Süre
+                        Limitiniz:</span>
+                    <select id="time-selector"
+                        class="w-full text-lg font-bold bg-white/80 border-2 border-blue-200 text-blue-700 rounded-xl px-4 py-2 outline-none cursor-pointer hover:bg-white focus:border-blue-400 transition-colors shadow-sm text-center">
+                        <option value="1">1 Dakika</option>
+                        <option value="25">25 Dakika</option>
                         <option value="30">30 Dakika</option>
                         <option value="45">45 Dakika</option>
                         <option value="60">1 Saat</option>
                         <option value="90">1.5 Saat</option>
                         <option value="120">2 Saat</option>
+                        <option value="150">2.5 Saat</option>
                         <option value="180">3 Saat</option>
                     </select>
                 </div>
 
-                <div class="flex gap-4">
-                    <button id="start-session-btn" class="bg-emerald-500 hover:bg-emerald-600 text-white px-10 py-4 rounded-2xl font-bold text-xl shadow-lg shadow-emerald-500/30 transition-all hover:-translate-y-1 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
+                <div class="flex flex-col sm:flex-row gap-4 w-full justify-center">
+                    <button id="start-session-btn"
+                        class="bg-emerald-500 hover:bg-emerald-600 text-white px-10 py-4 rounded-2xl font-bold text-xl shadow-lg shadow-emerald-500/30 transition-all hover:-translate-y-1 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
                         Seansı Başlat
                     </button>
-                    <button id="stop-session-btn" class="bg-rose-500 hover:bg-rose-600 text-white px-10 py-4 rounded-2xl font-bold text-xl shadow-lg shadow-rose-500/30 transition-all hover:-translate-y-1 active:scale-95 hidden">
+                    <button id="stop-session-btn"
+                        class="bg-rose-500 hover:bg-rose-600 text-white px-10 py-4 rounded-2xl font-bold text-xl shadow-lg shadow-rose-500/30 transition-all hover:-translate-y-1 active:scale-95 hidden">
                         Seansı Bitir
                     </button>
                 </div>
@@ -140,12 +183,30 @@
         </main>
     </div>
 
+    <!-- Phase 7: Gizlilik Politikası (Banner) -->
+    <div id="privacy-banner"
+        class="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50 bg-gray-900/90 backdrop-blur text-white px-6 py-4 rounded-2xl shadow-2xl flex flex-col sm:flex-row items-center gap-4 border border-gray-700 max-w-2xl w-[90%] transition-transform duration-500 translate-y-[150%]">
+        <div class="flex-1">
+            <h4 class="font-bold text-teal-400 text-sm mb-1">Kızılötesi ve Kamera Verisi Güvencesi 🛡️</h4>
+            <p class="text-xs text-gray-300">Bu sistem <b>MediaPipe</b> kullanarak görselinizi <span
+                    class="text-white font-bold blur-[0.5px]">asla</span> hiçbir sunucuya göndermeden, anlık olarak
+                tarayıcınızın kendi belleğinde (lokal) işler. Veriniz tamamen size aittir ve hiçbir koşulda depolanmaz.
+            </p>
+        </div>
+        <button id="close-privacy-btn"
+            class="bg-teal-500 hover:bg-teal-600 text-white font-bold py-2 px-5 rounded-xl transition shrink-0 shadow-lg text-sm">
+            Anladım
+        </button>
+    </div>
+
     <!-- Market Modal (Gizli olarak durur, Butona basınca görünür) -->
-    <div id="market-modal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center backdrop-blur-sm transition-all text-gray-800">
+    <div id="market-modal"
+        class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center backdrop-blur-sm transition-all text-gray-800">
         <div class="bg-white rounded-3xl w-full max-w-lg p-6 shadow-2xl transform scale-95 transition-transform">
             <div class="flex justify-between items-center border-b pb-4 mb-4">
                 <h2 class="text-2xl font-black text-blue-800">🛒 Balık Marketi</h2>
-                <button id="close-market-btn" class="text-gray-400 hover:text-rose-500 text-4xl font-light transition">&times;</button>
+                <button id="close-market-btn"
+                    class="text-gray-400 hover:text-rose-500 text-4xl font-light transition">&times;</button>
             </div>
             <!-- Dinamik Balık Listesi -->
             <div id="fish-shop-list" class="grid grid-cols-2 gap-4 max-h-96 overflow-y-auto p-1">
@@ -155,12 +216,14 @@
     </div>
 
     <!-- Sonuç Modalı (Seans bittiğinde tebrikler için açılır) -->
-    <div id="result-modal" class="fixed inset-0 bg-black/60 z-[100] hidden flex items-center justify-center backdrop-blur-md transition-all text-gray-800">
-        <div class="bg-white rounded-3xl w-full max-w-sm p-8 shadow-2xl flex flex-col items-center text-center transform scale-95 transition-transform">
+    <div id="result-modal"
+        class="fixed inset-0 bg-black/60 z-[100] hidden flex items-center justify-center backdrop-blur-md transition-all text-gray-800">
+        <div
+            class="bg-white rounded-3xl w-full max-w-sm p-8 shadow-2xl flex flex-col items-center text-center transform scale-95 transition-transform">
             <div class="text-7xl mb-4 animate-bounce">🎉</div>
             <h2 class="text-3xl font-black text-blue-800 mb-2">Tebrikler!</h2>
             <p class="text-gray-600 font-medium mb-6">Odaklanma seansını başarıyla tamamladın.</p>
-            
+
             <div class="w-full bg-blue-50 rounded-2xl p-4 mb-6 border border-blue-100">
                 <div class="flex justify-between mb-2">
                     <span class="font-bold text-gray-500">Toplam Süre:</span>
@@ -176,10 +239,123 @@
                     <span class="font-black text-2xl text-yellow-500"><span id="result-coins">4</span> 🪙</span>
                 </div>
             </div>
-            
-            <button id="close-result-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition-all shadow-md active:scale-95">
+
+            <div id="ai-motivation-container"
+                class="w-full bg-indigo-50 rounded-2xl p-4 mb-6 border border-indigo-100 hidden">
+                <p
+                    class="text-[10px] font-black uppercase tracking-wider text-indigo-400 mb-2 flex items-center justify-center gap-1">
+                    ✨ Gemini AI Motivasyon
+                </p>
+                <div id="ai-loading-spinner" class="hidden flex justify-center py-2 animate-pulse text-indigo-300">
+                    <span class="text-sm font-medium">Motivasyon yükleniyor...</span>
+                </div>
+                <p id="ai-motivation-text" class="text-xs text-indigo-800 italic leading-relaxed font-medium">
+                </p>
+            </div>
+
+            <button id="close-result-btn"
+                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition-all shadow-md active:scale-95">
                 Müthiş! Kapat
             </button>
+        </div>
+    </div>
+
+    <!-- Hoşgeldin & Tanıtım Modalı (Onboarding) -->
+    <div id="welcome-modal"
+        class="fixed inset-0 bg-black/70 z-[200] hidden flex items-center justify-center backdrop-blur-md transition-all text-gray-800">
+        <div
+            class="bg-white rounded-[2rem] w-full max-w-2xl p-0 shadow-2xl overflow-hidden flex flex-col transform scale-95 transition-transform">
+            <!-- Arka Plan Süsü -->
+            <div
+                class="h-32 bg-gradient-to-r from-teal-500 to-blue-600 flex items-center justify-center text-6xl shadow-inner uppercase tracking-widest font-black text-white/20 select-none">
+                AquaPosture
+            </div>
+
+            <div class="p-8 md:p-10 flex-1 overflow-y-auto max-h-[70vh]">
+                <div id="welcome-step-1" class="welcome-step">
+                    <h2 class="text-3xl font-black text-blue-800 mb-4">🌊 AquaPosture'a Hoş Geldin!</h2>
+                    <p class="text-gray-600 leading-relaxed mb-6 font-medium">Bizi tercih ettiğin için teşekkürler!
+                        AquaPosture, sadece duruşunu düzeltmekle kalmaz, aynı zamanda sana ait canlı bir su altı dünyası
+                        yaratmanı sağlar.</p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                        <div class="bg-blue-50 p-4 rounded-2xl border border-blue-100">
+                            <h3 class="font-bold text-blue-700 flex items-center gap-2 mb-2">🧘 Dik Dur, Kazan!</h3>
+                            <p class="text-xs text-gray-500 italic text-pretty leading-relaxed">Sen dik durdukça
+                                akvaryumun suyu berrak kalır ve balıkların mutlu olur. Slouching (kambur duruş) yaparsan
+                                su bulanıklaşır ve balıkların burada yaşamakta zorlanabilirler.</p>
+                        </div>
+                        <div class="bg-emerald-50 p-4 rounded-2xl border border-emerald-100">
+                            <h3 class="font-bold text-emerald-700 flex items-center gap-2 mb-2">🐟 Balıklarını Koru!
+                            </h3>
+                            <p class="text-xs text-gray-500 italic text-pretty leading-relaxed">Seansları yarım
+                                bırakarak 3 kere üst üste başarısız olursan, akvaryumundan rastgele bir balık
+                                kaybedebilirsin ve daha sonra onu tekrar satın alman gerekir!</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="welcome-step-2" class="welcome-step hidden">
+                    <h2 class="text-2xl font-black text-indigo-800 mb-4">🛠️ Günlük Sorumluluklar</h2>
+                    <ul class="space-y-4 mb-8">
+                        <li class="flex items-start gap-4">
+                            <span
+                                class="text-3xl bg-gray-100 w-12 h-12 flex items-center justify-center rounded-xl shrink-0">🧽</span>
+                            <div>
+                                <h4 class="font-bold text-gray-700">Cam Temizliği</h4>
+                                <p class="text-sm text-gray-500 italic text-pretty leading-relaxed">Her gün gelip
+                                    yosunlanan camları süngerle silerek akvaryumu pırıl pırıl tutmalısın.</p>
+                            </div>
+                        </li>
+                        <li class="flex items-start gap-4">
+                            <span
+                                class="text-3xl bg-gray-100 w-12 h-12 flex items-center justify-center rounded-xl shrink-0">🫘</span>
+                            <div>
+                                <h4 class="font-bold text-gray-700">Balıkları Yemle</h4>
+                                <p class="text-sm text-gray-500 italic text-pretty leading-relaxed">Dostlarını beslemeyi
+                                    unutma! Fare ile yem atarak onları besleyebilirsin.</p>
+                            </div>
+                        </li>
+                        <li class="flex items-start gap-4">
+                            <span
+                                class="text-3xl bg-gray-100 w-12 h-12 flex items-center justify-center rounded-xl shrink-0">👥</span>
+                            <div>
+                                <h4 class="font-bold text-gray-700">Sosyal ve Yarış</h4>
+                                <p class="text-sm text-gray-500 italic text-pretty leading-relaxed">Arkadaşlarını ekle
+                                    ve AquaCoin liderlik tablosunda yarış!</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+
+                <div id="welcome-step-3" class="welcome-step hidden">
+                    <h2 class="text-2xl font-black text-teal-800 mb-4">🔒 Gizlilik ve İzinler</h2>
+                    <div class="space-y-4 bg-gray-50 p-6 rounded-2xl border border-gray-200 mb-6">
+                        <p class="text-sm text-gray-600">Sistemin çalışabilmesi için <b>Kamera</b> ve <b>Bildirim</b>
+                            izinlerine ihtiyacımız var.</p>
+                        <ul class="text-xs text-gray-500 space-y-2 list-disc pl-4 italic leading-relaxed">
+                            <li>Görüntüleriniz <b>asla sunuculara gönderilmez</b>, tüm analiz tarayıcınızda lokal olarak
+                                yapılır.</li>
+                            <li>Bildirimler, siz arkaplanda (başka sekmede) çalışırken dik durmanızı hatırlatmak
+                                içindir.</li>
+                            <li>Sesli uyarılar odaklanmanızı artıracaktır.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer / Butonlar -->
+            <div class="p-8 bg-gray-50 flex justify-between items-center sm:gap-4 gap-2 flex-col sm:flex-row">
+                <div class="flex gap-2 mb-4 sm:mb-0">
+                    <div id="welcome-dot-1" class="w-2.5 h-2.5 rounded-full bg-blue-600"></div>
+                    <div id="welcome-dot-2" class="w-2.5 h-2.5 rounded-full bg-gray-300"></div>
+                    <div id="welcome-dot-3" class="w-2.5 h-2.5 rounded-full bg-gray-300"></div>
+                </div>
+                <button id="welcome-next-btn"
+                    class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-black py-4 px-10 rounded-2xl shadow-lg transition-all active:scale-95">
+                    Devam Et →
+                </button>
+            </div>
         </div>
     </div>
 
@@ -193,6 +369,8 @@
     <script src="js/auth.js"></script>
     <script src="js/db.js"></script>
     <script src="js/pose.js"></script>
+    <script src="js/ai.js"></script>
     <script src="js/app.js"></script>
 </body>
+
 </html>
