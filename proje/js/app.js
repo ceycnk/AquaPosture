@@ -10,6 +10,8 @@ const app = {
         console.log("🌊 AquaPosture Başlatılıyor...");
         
         const startCamBtn = document.getElementById('start-camera-btn');
+        const toggleCamBtn = document.getElementById('toggle-camera-btn');
+        
         if(startCamBtn) {
             startCamBtn.addEventListener('click', () => {
                 ui.elements.startCameraBtn.textContent = "Kameraya Bağlanıyor...";
@@ -18,6 +20,7 @@ const app = {
                 poseManager.startCamera().then(success => {
                     if(success) {
                         ui.elements.postureStatus.textContent = "Kamera açık. 3s içinde dik dur...";
+                        if(toggleCamBtn) toggleCamBtn.classList.remove('hidden');
                         setTimeout(() => {
                             poseManager.isCalibrated = false; 
                         }, 3000);
@@ -25,6 +28,19 @@ const app = {
                         ui.elements.startCameraBtn.textContent = "Tekrar Dene";
                     }
                 });
+            });
+        }
+        
+        if (toggleCamBtn) {
+            toggleCamBtn.addEventListener('click', () => {
+                poseManager.stopCamera();
+                ui.showCameraOverlay("Kamera Kapatıldı");
+                toggleCamBtn.classList.add('hidden');
+                
+                if (app.isSessionActive) {
+                    app.stopSession();
+                    alert("Kamera kapatıldığı için Pomodoro (Odaklanma) Seansı da durduruldu.");
+                }
             });
         }
         

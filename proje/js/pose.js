@@ -62,6 +62,19 @@ const poseManager = {
         } // Hata durumunda bu satırlar çalışacak
     },
     
+    stopCamera: function() {
+        if (this.camera) {
+            this.camera.stop();
+        }
+        if (ui.elements.inputVideo.srcObject) {
+            const tracks = ui.elements.inputVideo.srcObject.getTracks();
+            tracks.forEach(track => track.stop());
+            ui.elements.inputVideo.srcObject = null;
+        }
+        this.isCalibrated = false;
+        this.isGoodPosture = true;
+    },
+    
     onResults: function(results) {
         const canvasEl = ui.elements.outputCanvas;
         canvasEl.width = ui.elements.inputVideo.videoWidth || 640;

@@ -7,6 +7,7 @@ const ui = {
         aquariumBg: document.getElementById('aquarium-bg'),
         cameraOverlay: document.getElementById('camera-overlay'),
         startCameraBtn: document.getElementById('start-camera-btn'),
+        toggleCameraBtn: document.getElementById('toggle-camera-btn'),
         inputVideo: document.getElementById('input-video'),
         outputCanvas: document.getElementById('output-canvas')
     },
@@ -42,5 +43,19 @@ const ui = {
     hideCameraOverlay: function() {
         this.elements.cameraOverlay.classList.add('hidden');
         this.elements.outputCanvas.style.backgroundColor = 'transparent';
+    },
+
+    showCameraOverlay: function(title) {
+        this.elements.cameraOverlay.classList.remove('hidden');
+        if (title) {
+            this.elements.cameraOverlay.querySelector('h3').textContent = title;
+        }
+        this.elements.startCameraBtn.textContent = "Kamerayı Aç";
+        this.elements.postureStatus.textContent = "Bekleniyor...";
+        this.elements.postureStatus.className = "font-extrabold text-blue-500 text-sm";
+        this.elements.aquariumBg.style.filter = "blur(0px) brightness(1)";
+        
+        const ctx = this.elements.outputCanvas.getContext('2d');
+        ctx.clearRect(0, 0, this.elements.outputCanvas.width, this.elements.outputCanvas.height);
     }
 };
