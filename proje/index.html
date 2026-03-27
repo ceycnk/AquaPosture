@@ -15,11 +15,8 @@
 </head>
 <body class="bg-teal-50 text-gray-800 font-sans overflow-hidden">
     <div id="aquarium-bg" class="fixed inset-0 z-0 bg-blue-300 transition-all duration-700 ease-in-out">
-        <div class="absolute inset-0 flex items-center justify-around opacity-40 text-6xl select-none" style="pointer-events: none;">
-            <div class="animate-pulse">🐠</div> 
-            <div class="animate-bounce">🐟</div>
-            <div class="animate-pulse">🐡</div>
-        </div>
+        <!-- Akvaryum Balıkları JS Tarafından Buraya Dinamik Doldurulacak -->
+        <div id="fish-container" class="absolute inset-0 w-full h-full pointer-events-none opacity-40"></div>
     </div>
 
     <div id="ui-layer" class="relative z-10 h-screen w-screen flex flex-col p-6 max-w-6xl mx-auto">
@@ -27,6 +24,9 @@
         <header class="flex justify-between items-center bg-white/80 backdrop-blur-md p-4 rounded-2xl shadow-sm border border-white/50">
             <h1 class="text-3xl font-extrabold text-blue-700 tracking-tight">🌊 Aqua<span class="text-teal-500">Posture</span></h1>
             <div class="flex items-center gap-4">
+                <button id="market-btn" class="hidden bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-xl font-bold transition-all shadow-md active:scale-95 flex items-center gap-2">
+                    🛒 Market
+                </button>
                 <div class="bg-yellow-50 border border-yellow-200 text-yellow-700 px-4 py-2 rounded-xl font-bold flex gap-2 items-center shadow-inner">
                     <span>🪙 AquaCoin:</span>
                     <span id="coin-counter" class="text-lg">0</span>
@@ -100,6 +100,20 @@
         </main>
     </div>
 
+    <!-- Market Modal (Gizli olarak durur, Butona basınca görünür) -->
+    <div id="market-modal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center backdrop-blur-sm transition-all text-gray-800">
+        <div class="bg-white rounded-3xl w-full max-w-lg p-6 shadow-2xl transform scale-95 transition-transform">
+            <div class="flex justify-between items-center border-b pb-4 mb-4">
+                <h2 class="text-2xl font-black text-blue-800">🛒 Balık Marketi</h2>
+                <button id="close-market-btn" class="text-gray-400 hover:text-rose-500 text-4xl font-light transition">&times;</button>
+            </div>
+            <!-- Dinamik Balık Listesi -->
+            <div id="fish-shop-list" class="grid grid-cols-2 gap-4 max-h-96 overflow-y-auto p-1">
+                <!-- JS'ten doldurulacak -->
+            </div>
+        </div>
+    </div>
+
     <!-- Firebase (v9 Compat) CDN -->
     <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-auth-compat.js"></script>
@@ -108,6 +122,7 @@
     <!-- Vanilla JS Düz Kodlar -->
     <script src="js/ui.js"></script>
     <script src="js/auth.js"></script>
+    <script src="js/db.js"></script>
     <script src="js/pose.js"></script>
     <script src="js/app.js"></script>
 </body>

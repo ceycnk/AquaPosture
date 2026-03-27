@@ -5,10 +5,12 @@ const app = {
     sessionTimer: null,
     timeLeft: 25 * 60,
     isSessionActive: false,
+    userData: null,
     
     init: function() {
         console.log("🌊 AquaPosture Başlatılıyor...");
         
+        // --- KAMERA ---
         const startCamBtn = document.getElementById('start-camera-btn');
         const toggleCamBtn = document.getElementById('toggle-camera-btn');
         
@@ -44,12 +46,14 @@ const app = {
             });
         }
         
+        // --- SEANS ---
         const startSessionBtn = document.getElementById('start-session-btn');
         const stopSessionBtn = document.getElementById('stop-session-btn');
         
         if(startSessionBtn) startSessionBtn.addEventListener('click', () => this.startSession());
         if(stopSessionBtn) stopSessionBtn.addEventListener('click', () => this.stopSession());
         
+        // --- AUTH ---
         const loginBtn = document.getElementById('login-btn');
         const logoutBtn = document.getElementById('logout-btn');
 
@@ -60,16 +64,84 @@ const app = {
             ui.setPostureState(isGood);
         };
         
-        // Firebase Auth Tetikleyicisi
-        authManager.onAuthChange = (user) => {
+        // --- VERITABANI VE AUTH DINLEMESI ---
+        authManager.onAuthChange = async (user) => {
             if (user) {
+                // UI Güncelleme
                 ui.setUserProfile(user.displayName, user.photoURL);
+                if(ui.elements.marketBtn) ui.elements.marketBtn.classList.remove('hidden');
+                
+                // Veritabanı (Firestore) Yükleme
+                const data = await dbManager.initUserDoc(user.uid, user.displayName);
+                if (data) {
+                    app.userData = data;
+                    app.coins = data.coins;
+                    ui.updateCoins(app.coins);
+                    ui.renderAquarium(data.fishes);
+                }
             } else {
+                // Çıkış Durumu
                 ui.setLoginState();
+                if(ui.elements.marketBtn) ui.elements.marketBtn.classList.add('hidden');
+                app.userData = null;
+                app.coins = 0;
+                ui.updateCoins(0);
+                ui.renderAquarium([]); // Akvaryum balıksız kalır
             }
         };
         
         authManager.init();
+
+        // --- MARKET EVENTLERI ---
+        if(ui.elements.marketBtn) {
+            ui.elements.marketBtn.addEventListener('click', () => {
+                if(app.userData) {
+                    ui.renderShop(app.coins, app.userData.fishes);
+                    ui.toggleMarket(true);
+                }
+            });
+        }
+        
+        if(ui.elements.closeMarketBtn) {
+            ui.elements.closeMarketBtn.addEventListener('click', () => ui.toggleMarket(false));
+        }
+        
+        // Dinamik Butonlara Tıklama (Event Delegation)
+        if(ui.elements.fishShopList) {
+            ui.elements.fishShopList.addEventListener('click', async (e) => {
+                if (e.target.classList.contains('buy-fish-btn') && !e.target.disabled) {
+                    const fishId = e.target.getAttribute('data-id');
+                    const fishObj = window.FISH_CATALOG.find(f => f.id === fishId);
+                    
+                    // Geçici yükleniyor state'i
+                    const originalText = e.target.textContent;
+                    e.target.textContent = "Satın Alınıyor...";
+                    e.target.disabled = true;
+                    
+                    if (authManager.user && app.userData) {
+                        const result = await dbManager.buyFish(
+                            authManager.user.uid, 
+                            app.userData.fishes, 
+                            app.coins, 
+                            fishId, 
+                            fishObj.cost
+                        );
+                        if (result.success) {
+                            app.coins = result.newTotal;
+                            app.userData.fishes = result.newFishes;
+                            
+                            ui.updateCoins(app.coins);
+                            ui.renderShop(app.coins, app.userData.fishes); // Butonları yeniden çiz
+                            ui.renderAquarium(app.userData.fishes); // Akvaryumu yenile
+                        } else {
+                            alert("Satın alma başarısız: " + result.reason);
+                            e.target.textContent = originalText;
+                            e.target.disabled = false;
+                        }
+                    }
+                }
+            });
+        }
     },
     
     startSession: function() {
@@ -89,13 +161,19 @@ const app = {
                 const percentage = ((totalDuration - this.timeLeft) / totalDuration) * 100;
                 progressBar.style.width = percentage + "%";
                 
+                // COIN EKLEME MANTIGI (5 Dakikada 1 Coin = 300 Sn)
                 if (poseManager.isCalibrated && poseManager.isGoodPosture) {
                     this.goodPostureSeconds++;
-                    // 300 saniye = 5 dakika
+                    
                     if (this.goodPostureSeconds >= 300) {
                         this.coins++;
                         ui.updateCoins(this.coins);
-                        this.goodPostureSeconds = 0;
+                        this.goodPostureSeconds = 0; // Bir sonraki 5dk için sıfırla
+                        
+                        // Veritabanını güncelle (Kullanıcı giriş yapmışsa)
+                        if (authManager.user && app.userData) {
+                             dbManager.updateCoins(authManager.user.uid, this.coins);
+                        }
                     }
                 }
             } else {
