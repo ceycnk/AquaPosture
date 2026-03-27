@@ -26,6 +26,7 @@ const dbManager = {
             }
         } catch (e) {
             console.error("Firestore initUserDoc hatası:", e);
+            alert("Veritabanı (Firestore) bağlantısı kurulamadı! Lütfen Firebase Console üzerinden 'Firestore Database' oluşturduğunuzdan emin olun.");
             return null;
         }
     },
