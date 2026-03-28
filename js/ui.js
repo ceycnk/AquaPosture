@@ -809,7 +809,12 @@ const ui = {
         
         // Error or Legacy String Handling
         if (typeof data === 'string') {
-            this.elements.weeklyReportText.innerHTML = `<div class="p-6 text-center text-rose-500 font-bold bg-rose-50 rounded-2xl border border-rose-100">${data}</div>`;
+            this.elements.weeklyReportText.innerHTML = `
+                <div class="p-8 text-center bg-teal-50/30 rounded-3xl border border-teal-100/50 shadow-sm relative overflow-hidden">
+                    <div class="absolute -left-4 -bottom-4 text-6xl opacity-10">🐬</div>
+                    <p class="text-teal-800 font-medium italic relative z-10 leading-relaxed text-lg px-4">${data}</p>
+                </div>
+            `;
             return;
         }
 

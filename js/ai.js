@@ -86,7 +86,17 @@ const geminiManager = {
 
         } catch (error) {
             console.error("Haftalık Rapor Hatası:", error);
-            ui.renderWeeklyReport(`⚠️ HATA: ${error.message}`);
+            
+            const pirateMsgs = [
+                "Akvaryumun suları şu an biraz bulandı, bilgelerin cevabı kıyıya biraz geç vuracak... 🌊",
+                "Şu an mercan resiflerinde minik bir fırtına var, birazdan tekrar dene istersen. 🌪️",
+                "Bilge kaplumbağa şu an derin bir uykuda, raporun için ona biraz zaman verelim. 🐢",
+                "Derinlerde akıntılar biraz sertleşti, bilgileri toplamak için bekliyoruz. ⚓",
+                "İstiridyeler kapandı, bilgeliğin açılması için biraz sabretmelisin. 🐚"
+            ];
+            const randomMsg = pirateMsgs[Math.floor(Math.random() * pirateMsgs.length)];
+            
+            ui.renderWeeklyReport(randomMsg);
         }
     }
 };
