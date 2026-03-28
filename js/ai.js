@@ -35,11 +35,33 @@ const geminiManager = {
 
     generateWeeklyReport: async function(uid) {
         try {
+            ui.showWeeklyReportLoading();
+
             // Firestore'dan son 7 günün verilerini çek
             const sessions = await dbManager.getWeeklySessions(uid);
             
+            // Grafik verilerini her durumda hazırla (Boş olsa bile dünü/bugünü görelim)
+            const chartData = [];
+            const today = new Date();
+            for (let i = 6; i >= 0; i--) {
+                const date = new Date();
+                date.setDate(today.getDate() - i);
+                const dayName = date.toLocaleDateString('tr-TR', { weekday: 'short' }).replace('.', '');
+                
+                const dayMins = sessions
+                    .filter(s => new Date(s.timestamp).toDateString() === date.toDateString())
+                    .reduce((acc, s) => acc + (s.totalMinutes || 0), 0);
+                
+                chartData.push({ day: dayName, mins: dayMins });
+            }
+            const maxMins = Math.max(...chartData.map(d => d.mins), 1);
+            chartData.forEach(d => d.percent = Math.max((d.mins / maxMins) * 100, 5));
+
             if (sessions.length === 0) {
-                ui.renderWeeklyReport("<p class='text-center py-10 text-gray-400'>Henüz bu hafta tamamlanmış bir seansın bulunmuyor. Hadi bir tane başlat! 🌊</p>");
+                ui.renderWeeklyReport({
+                    report: "Henüz bu hafta seansın yok. Balıklar seni özledi, bir seans başlatmaya ne dersin? 🌊",
+                    chartData: chartData
+                });
                 return;
             }
 
@@ -53,54 +75,18 @@ const geminiManager = {
             const data = await response.json();
             
             if (response.ok && data && data.report) {
-                // Günlük verileri grafik için hazırla (Son 7 gün)
-                const chartData = [];
-                const days = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
-                const today = new Date();
-                
-                // Son 7 günü oluştur
-                for (let i = 6; i >= 0; i--) {
-                    const date = new Date();
-                    date.setDate(today.getDate() - i);
-                    const dayName = date.toLocaleDateString('tr-TR', { weekday: 'short' }).replace('.', '');
-                    
-                    // Bu güne ait seansların toplam dakikasını bul
-                    const dayMins = sessions
-                        .filter(s => new Date(s.timestamp).toDateString() === date.toDateString())
-                        .reduce((acc, s) => acc + (s.totalMinutes || 0), 0);
-                    
-                    chartData.push({ day: dayName, mins: dayMins });
-                }
-
-                // Yüzde hesapla (En yüksek güne göre)
-                const maxMins = Math.max(...chartData.map(d => d.mins), 1);
-                chartData.forEach(d => d.percent = Math.max((d.mins / maxMins) * 100, 5)); // En az %5 görünsün
-
                 ui.renderWeeklyReport({
                     report: data.report,
                     chartData: chartData
                 });
             } else {
                 const errorDetail = data.error || `Bağlantı Hatası (Kod: ${response.status})`;
-                if (data.availableModels) {
-                  const modelsList = data.availableModels.map(m => m.name.replace('models/', '')).join(', ');
-                  throw new Error(`${errorDetail} - Mevcut Modelleriniz: ${modelsList}`);
-                }
                 throw new Error(errorDetail);
             }
 
         } catch (error) {
             console.error("Haftalık Rapor Hatası:", error);
-            const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
-            let msg = "Rapor şu an hazırlanırken bir fırtınaya yakalandık. Lütfen sonra tekrar deneyin! 🌪️";
-            
-            if (isLocal) {
-                msg = "⚠️ Localhost'tasınız. Vercel /api fonksiyonları 'vercel dev' komutu olmadan çalışmaz. Lütfen projeyi Vercel'e deploy edin veya vercel dev kullanın.";
-            } else if (error.message) {
-                msg = `⚠️ HATA: ${error.message}`;
-            }
-
-            ui.renderWeeklyReport(`<p class='text-center py-10 text-rose-500 font-bold'>${msg}</p>`);
+            ui.renderWeeklyReport(`⚠️ HATA: ${error.message}`);
         }
     }
 };

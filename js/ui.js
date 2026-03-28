@@ -807,36 +807,50 @@ const ui = {
         this.elements.weeklyReportLoading.classList.add('hidden');
         this.elements.weeklyReportText.classList.remove('hidden');
         
-        // HTML yapısını grafik ve AI mesajı olarak kuruyoruz
-        let html = `
-            <div class="mb-8 bg-teal-50/50 p-6 rounded-[2rem] border border-teal-100/30">
-                <div class="flex items-end justify-between h-44 gap-2 px-1 mb-2">
-                    ${data.chartData.map(d => `
-                        <div class="flex flex-col items-center flex-1 group">
-                            <div class="relative w-full flex justify-center items-end h-full">
-                                <div class="bg-gradient-to-t from-teal-500 to-teal-400 rounded-t-xl w-3/4 transition-all duration-1000 origin-bottom hover:from-teal-600 hover:to-teal-500 cursor-help shadow-sm" 
-                                     style="height: ${d.percent}%" 
-                                     title="${d.mins} dakika">
-                                     <span class="absolute -top-7 left-1/2 -translate-x-1/2 text-[10px] font-black text-teal-700 opacity-0 group-hover:opacity-100 transition-all transform group-hover:-translate-y-1">
-                                        ${d.mins}'
-                                     </span>
+        // Error or Legacy String Handling
+        if (typeof data === 'string') {
+            this.elements.weeklyReportText.innerHTML = `<div class="p-6 text-center text-rose-500 font-bold bg-rose-50 rounded-2xl border border-rose-100">${data}</div>`;
+            return;
+        }
+
+        // Object Handling (Chart + Report)
+        try {
+            if (!data.chartData || !Array.isArray(data.chartData)) {
+                throw new Error("Grafik verisi eksik.");
+            }
+
+            let html = `
+                <div class="mb-8 bg-teal-50/50 p-6 rounded-[2rem] border border-teal-100/30">
+                    <div class="flex items-end justify-between h-44 gap-2 px-1 mb-2">
+                        ${data.chartData.map(d => `
+                            <div class="flex flex-col items-center flex-1 group">
+                                <div class="relative w-full flex justify-center items-end h-full">
+                                    <div class="bg-gradient-to-t from-teal-500 to-teal-400 rounded-t-xl w-3/4 transition-all duration-1000 origin-bottom hover:from-teal-600 hover:to-teal-500 cursor-help shadow-sm" 
+                                         style="height: ${d.percent || 5}%" 
+                                         title="${d.mins || 0} dakika">
+                                         <span class="absolute -top-7 left-1/2 -translate-x-1/2 text-[10px] font-black text-teal-700 opacity-0 group-hover:opacity-100 transition-all transform group-hover:-translate-y-1">
+                                            ${d.mins || 0}'
+                                         </span>
+                                    </div>
                                 </div>
+                                <span class="text-[10px] font-black text-gray-400 mt-3 uppercase tracking-tighter">${d.day || '?'}</span>
                             </div>
-                            <span class="text-[10px] font-black text-gray-400 mt-3 uppercase tracking-tighter">${d.day}</span>
-                        </div>
-                    `).join('')}
+                        `).join('')}
+                    </div>
                 </div>
-            </div>
-            
-            <div class="p-8 bg-white border border-teal-50 rounded-3xl shadow-sm relative overflow-hidden text-center">
-                <div class="absolute -left-1 -top-1 text-5xl text-teal-100 font-serif opacity-30">"</div>
-                <p class="text-gray-700 font-medium leading-relaxed italic relative z-10 text-lg">
-                    ${data.report}
-                </p>
-                <div class="absolute -right-1 -bottom-1 text-5xl text-teal-100 font-serif opacity-30 transform rotate-180">"</div>
-            </div>
-        `;
-        
-        this.elements.weeklyReportText.innerHTML = html;
+                
+                <div class="p-8 bg-white border border-teal-50 rounded-3xl shadow-sm relative overflow-hidden text-center">
+                    <div class="absolute -left-1 -top-1 text-5xl text-teal-100 font-serif opacity-30">"</div>
+                    <p class="text-gray-700 font-medium leading-relaxed italic relative z-10 text-lg">
+                        ${data.report || "Bilge dostların bu hafta söyleyecek pek bir sözü yok..."}
+                    </p>
+                    <div class="absolute -right-1 -bottom-1 text-5xl text-teal-100 font-serif opacity-30 transform rotate-180">"</div>
+                </div>
+            `;
+            this.elements.weeklyReportText.innerHTML = html;
+        } catch (err) {
+            console.error("Render hatası:", err);
+            this.elements.weeklyReportText.innerHTML = `<div class="p-6 text-center text-amber-600 bg-amber-50 rounded-2xl border border-amber-100">Veriler hazırlanırken minik bir hata oldu, ama üzülme! Grafiği birazdan tekrar deneyebilirsin. 🐚</div>`;
+        }
     }
 };
