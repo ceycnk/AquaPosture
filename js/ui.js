@@ -803,9 +803,40 @@ const ui = {
         this.elements.weeklyReportText.innerHTML = "";
     },
 
-    renderWeeklyReport: function(htmlContent) {
+    renderWeeklyReport: function(data) {
         this.elements.weeklyReportLoading.classList.add('hidden');
         this.elements.weeklyReportText.classList.remove('hidden');
-        this.elements.weeklyReportText.innerHTML = htmlContent;
+        
+        // HTML yapısını grafik ve AI mesajı olarak kuruyoruz
+        let html = `
+            <div class="mb-8 bg-teal-50/50 p-6 rounded-[2rem] border border-teal-100/30">
+                <div class="flex items-end justify-between h-44 gap-2 px-1 mb-2">
+                    ${data.chartData.map(d => `
+                        <div class="flex flex-col items-center flex-1 group">
+                            <div class="relative w-full flex justify-center items-end h-full">
+                                <div class="bg-gradient-to-t from-teal-500 to-teal-400 rounded-t-xl w-3/4 transition-all duration-1000 origin-bottom hover:from-teal-600 hover:to-teal-500 cursor-help shadow-sm" 
+                                     style="height: ${d.percent}%" 
+                                     title="${d.mins} dakika">
+                                     <span class="absolute -top-7 left-1/2 -translate-x-1/2 text-[10px] font-black text-teal-700 opacity-0 group-hover:opacity-100 transition-all transform group-hover:-translate-y-1">
+                                        ${d.mins}'
+                                     </span>
+                                </div>
+                            </div>
+                            <span class="text-[10px] font-black text-gray-400 mt-3 uppercase tracking-tighter">${d.day}</span>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+            
+            <div class="p-8 bg-white border border-teal-50 rounded-3xl shadow-sm relative overflow-hidden text-center">
+                <div class="absolute -left-1 -top-1 text-5xl text-teal-100 font-serif opacity-30">"</div>
+                <p class="text-gray-700 font-medium leading-relaxed italic relative z-10 text-lg">
+                    ${data.report}
+                </p>
+                <div class="absolute -right-1 -bottom-1 text-5xl text-teal-100 font-serif opacity-30 transform rotate-180">"</div>
+            </div>
+        `;
+        
+        this.elements.weeklyReportText.innerHTML = html;
     }
 };

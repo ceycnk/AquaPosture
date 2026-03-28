@@ -53,7 +53,33 @@ const geminiManager = {
             const data = await response.json();
             
             if (response.ok && data && data.report) {
-                ui.renderWeeklyReport(data.report);
+                // Günlük verileri grafik için hazırla (Son 7 gün)
+                const chartData = [];
+                const days = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
+                const today = new Date();
+                
+                // Son 7 günü oluştur
+                for (let i = 6; i >= 0; i--) {
+                    const date = new Date();
+                    date.setDate(today.getDate() - i);
+                    const dayName = date.toLocaleDateString('tr-TR', { weekday: 'short' }).replace('.', '');
+                    
+                    // Bu güne ait seansların toplam dakikasını bul
+                    const dayMins = sessions
+                        .filter(s => new Date(s.timestamp).toDateString() === date.toDateString())
+                        .reduce((acc, s) => acc + (s.totalMinutes || 0), 0);
+                    
+                    chartData.push({ day: dayName, mins: dayMins });
+                }
+
+                // Yüzde hesapla (En yüksek güne göre)
+                const maxMins = Math.max(...chartData.map(d => d.mins), 1);
+                chartData.forEach(d => d.percent = Math.max((d.mins / maxMins) * 100, 5)); // En az %5 görünsün
+
+                ui.renderWeeklyReport({
+                    report: data.report,
+                    chartData: chartData
+                });
             } else {
                 const errorDetail = data.error || `Bağlantı Hatası (Kod: ${response.status})`;
                 if (data.availableModels) {

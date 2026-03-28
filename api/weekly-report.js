@@ -18,23 +18,14 @@ export default async function handler(req, res) {
     const totalCoins = sessions.reduce((acc, s) => acc + (s.earnedCoins || 0), 0);
     const avgPosture = totalMinutes > 0 ? Math.round((totalGoodMinutes / totalMinutes) * 100) : 0;
 
-    const prompt = `Sen AquaPosture isimli akvaryum simülasyonu ve duruş düzeltme uygulamasının bilge "Usta Akvaryum Bakıcısı" asistanısın. 
-    Kullanıcının haftalık seans verileri (akvaryum bakım performansı) aşağıdadır:
-    - Toplam Bakım Seansı: ${totalSessions}
-    - Toplam İlgilenilen Süre: ${totalMinutes} dakika
-    - Toplam Dik Duruş (Berrak Su) Süresi: ${totalGoodMinutes} dakika
-    - Ortalama Cam Parlaklığı (Duruş Başarısı): %${avgPosture}
-    - Bu Hafta Toplanan Yem/Puan: ${totalCoins} AquaCoin
+    const prompt = `Sen AquaPosture isimli akvaryum simülasyonu ve duruş düzeltme uygulamasının bilge deniz canlısı asistanısın. 
+    Kullanıcının haftalık özeti:
+    - Toplam Süre: ${totalMinutes} dk
+    - Dik Duruş: ${totalGoodMinutes} dk
+    - Toplanan AquaCoin: ${totalCoins}
     
-    Lütfen bu verileri kullanarak kullanıcıya akvaryum temalı, neşeli ve teşvik edici bir "Haftalık Akvaryum Karnesi" oluştur. 
-    İçeriğinde:
-    1. Kullanıcının bakım becerisine göre bir unvan ver (Örn: Akvaryum Çaylağı, Japon Balığı Dostu, Resif Koruyucusu, Akvaryum Gurusu vb.).
-    2. Verileri bir "Akvaryum Bakım İpucu" olarak analiz et (Örn: %70 altındaysa 'Camlar biraz buğulanmış, daha dik durarak suyu berraklaştırmalısın' gibi).
-    3. Gelecek hafta için balıkları mutlu edecek minik bir görev / meydan okuma bırak.
-    
-    Yanıtını HTML formatında, <h3>, <p>, <ul> ve <strong> etiketlerini kullanarak ver. Stil ekleme, sadece yapısal HTML olsun. 
-    Lütfen her seferinde farklı bir hikaye anlatımı veya farklı deniz canlılarının bakış açısını kullan.
-    (Not: Bir hafta yengeç, bir hafta bilge kaplumbağa, bir hafta yunus gibi farklı bir personayı yansıtabilirsin.)
+    Lütfen bu verileri kullanarak kullanıcıya ŞİİRSEL, BİLGE ve MOTİVE EDİCİ bir haftalık özet yaz.
+    Sadece 1 veya en fazla 2 kısa cümle yaz. Markdown veya HTML kullanma, sadece düz metin olsun.
     Türkçe konuş.`;
 
     try {
