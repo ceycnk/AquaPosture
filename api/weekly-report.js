@@ -60,9 +60,22 @@ export default async function handler(req, res) {
             
             return res.status(200).json({ report: aiMsg });
         } else {
-            const apiError = data.error?.message || 'Gemini API geçersiz yanıt verdi veya kota doldu.';
-            console.error("Gemini API Detaylı Hata:", data.error || data);
-            return res.status(502).json({ error: apiError });
+            console.error("Gemini API Hata Detayı:", data);
+            
+            // Eğer model bulunamadıysa (404), mevcut modelleri de listele
+            let availableModels = null;
+            try {
+                const listRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
+                const listData = await listRes.json();
+                availableModels = listData.models || null;
+            } catch (err) {
+                console.error("Modelleri listeleme hatası:", err);
+            }
+
+            return res.status(502).json({ 
+                error: data.error?.message || 'Gemini API geçersiz yanıt verdi veya kota doldu.',
+                availableModels: availableModels
+            });
         }
     } catch (error) {
         console.error("Gemini Weekly Report Proxy Hatası:", error);

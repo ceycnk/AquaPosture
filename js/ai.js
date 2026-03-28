@@ -56,6 +56,10 @@ const geminiManager = {
                 ui.renderWeeklyReport(data.report);
             } else {
                 const errorDetail = data.error || `Bağlantı Hatası (Kod: ${response.status})`;
+                if (data.availableModels) {
+                  const modelsList = data.availableModels.map(m => m.name.replace('models/', '')).join(', ');
+                  throw new Error(`${errorDetail} - Mevcut Modelleriniz: ${modelsList}`);
+                }
                 throw new Error(errorDetail);
             }
 
