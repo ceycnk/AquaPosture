@@ -25,8 +25,12 @@ export default async function handler(req, res) {
     - Toplanan AquaCoin: ${totalCoins}
     
     Lütfen bu verileri kullanarak kullanıcıya ŞİİRSEL, BİLGE ve MOTİVE EDİCİ bir haftalık özet yaz.
-    Sadece 1 veya en fazla 2 kısa cümle yaz. Markdown veya HTML kullanma, sadece düz metin olsun.
-    Türkçe konuş.`;
+    
+    ÖNEMLİ KURALLAR:
+    1. Sadece TEK BİR CÜMLE yaz.
+    2. Maksimum 10 kelime olsun (Daha uzun yazma!).
+    3. Markdown veya HTML kullanma, sadece düz metin olsun.
+    4. Türkçe konuş.`;
 
     try {
         const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`, {
