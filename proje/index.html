@@ -61,33 +61,33 @@
     </div>
 
     <div id="ui-layer"
-        class="relative z-10 h-screen w-screen flex flex-col p-6 max-w-6xl mx-auto transition-all duration-700 ease-in-out">
+        class="relative z-10 min-h-screen w-full flex flex-col p-4 md:p-6 max-w-6xl mx-auto transition-all duration-700 ease-in-out overflow-x-hidden">
 
         <header
-            class="flex flex-col md:flex-row justify-between items-center gap-4 md:gap-0 bg-white/80 backdrop-blur-md p-4 rounded-2xl shadow-sm border border-white/50">
-            <h1 class="text-3xl font-extrabold text-blue-700 tracking-tight">🌊 Aqua<span
+            class="flex flex-col md:flex-row justify-between items-center gap-2 md:gap-0 bg-white/80 backdrop-blur-md p-3 rounded-2xl shadow-sm border border-white/50">
+            <h1 class="text-2xl font-extrabold text-blue-700 tracking-tight shrink-0">🌊 Aqua<span
                     class="text-teal-500">Posture</span></h1>
-            <div class="flex flex-wrap items-center justify-center gap-4">
+            <div class="flex flex-nowrap items-center justify-center gap-2 overflow-x-auto no-scrollbar py-1">
                 <button id="view-aquarium-btn"
-                    class="hidden bg-sky-500 hover:bg-sky-600 text-white px-4 py-2 rounded-xl font-bold transition-all shadow-md active:scale-95 flex items-center gap-2">
-                    🌊 Akvaryumum
+                    class="hidden bg-sky-500 hover:bg-sky-600 text-white px-3 py-1.5 rounded-xl font-bold text-sm transition-all shadow-md active:scale-95 flex items-center gap-1.5 shrink-0">
+                    🌊 Akvaryum
                 </button>
                 <button id="market-btn"
-                    class="hidden bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-xl font-bold transition-all shadow-md active:scale-95 flex items-center gap-2">
+                    class="hidden bg-purple-600 hover:bg-purple-700 text-white px-3 py-1.5 rounded-xl font-bold text-sm transition-all shadow-md active:scale-95 flex items-center gap-1.5 shrink-0">
                     🛒 Market
                 </button>
                 <div
-                    class="bg-yellow-50 border border-yellow-200 text-yellow-700 px-4 py-2 rounded-xl font-bold flex gap-2 items-center shadow-inner">
+                    class="bg-yellow-50 border border-yellow-200 text-yellow-700 px-3 py-1.5 rounded-xl font-bold text-sm flex gap-1.5 items-center shadow-inner shrink-0">
                     <span>🪙 AquaCoin:</span>
-                    <span id="coin-counter" class="text-lg">0</span>
+                    <span id="coin-counter" class="text-md">0</span>
                 </div>
                 <button id="login-btn"
-                    class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl font-semibold transition-all shadow-md active:scale-95">
-                    Google ile Giriş
+                    class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded-xl font-semibold text-sm transition-all shadow-md active:scale-95 shrink-0">
+                    Giriş Yap
                 </button>
                 <!-- Giriş yaptıktan sonra görünecek kullanıcı profil alanı -->
                 <div id="user-info"
-                    class="hidden flex items-center gap-2 bg-blue-50 px-3 py-1 rounded-xl border border-blue-200 shadow-sm">
+                    class="hidden flex flex-nowrap items-center gap-1.5 bg-blue-50 px-2 py-1 rounded-xl border border-blue-200 shadow-sm shrink-0">
                     <img id="user-avatar" src="" alt="Avatar" class="w-8 h-8 rounded-full border border-blue-300">
                     <span id="user-name" class="font-bold text-sm text-blue-800">İsim</span>
                     <button id="logout-btn"
@@ -138,17 +138,18 @@
             </section>
 
             <section
-                class="flex-1 bg-white/80 backdrop-blur-md p-8 rounded-2xl shadow-sm border border-white/50 flex flex-col items-center justify-center relative overflow-hidden">
+                class="flex-1 bg-white/80 backdrop-blur-md p-6 md:p-10 rounded-2xl shadow-sm border border-white/50 flex flex-col items-center justify-center relative overflow-hidden min-h-[400px]">
                 <div class="absolute top-0 left-0 w-full h-2 bg-gray-200">
                     <div id="session-progress" class="h-full bg-teal-400 w-0 transition-all duration-1000 linear"></div>
                 </div>
 
-                <div class="text-center mb-8">
-                    <h2 class="text-2xl font-bold text-gray-700">Seans Süresi</h2>
-                    <p class="text-gray-500">Dik dur, para kazan, balıkları yaşat.</p>
+                <div class="text-center mb-4 md:mb-8">
+                    <h2 class="text-xl md:text-2xl font-bold text-gray-700">Seans Süresi</h2>
+                    <p class="text-sm text-gray-500">Dik dur, para kazan, balıkları yaşat.</p>
                 </div>
 
-                <div class="text-8xl font-black text-gray-800 tracking-tighter mb-6 drop-shadow-sm font-mono">
+                <div
+                    class="text-6xl sm:text-7xl md:text-8xl font-black text-gray-800 tracking-tighter mb-4 md:mb-6 drop-shadow-sm font-mono shrink-0">
                     <span id="timer-display">25:00</span>
                 </div>
 
@@ -169,13 +170,13 @@
                     </select>
                 </div>
 
-                <div class="flex flex-col sm:flex-row gap-4 w-full justify-center">
+                <div class="flex flex-col sm:flex-row gap-4 w-full justify-center shrink-0">
                     <button id="start-session-btn"
-                        class="bg-emerald-500 hover:bg-emerald-600 text-white px-10 py-4 rounded-2xl font-bold text-xl shadow-lg shadow-emerald-500/30 transition-all hover:-translate-y-1 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
+                        class="bg-emerald-500 hover:bg-emerald-600 text-white px-8 py-3 md:px-10 md:py-4 rounded-2xl font-bold text-lg md:text-xl shadow-lg shadow-emerald-500/30 transition-all hover:-translate-y-1 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
                         Seansı Başlat
                     </button>
                     <button id="stop-session-btn"
-                        class="bg-rose-500 hover:bg-rose-600 text-white px-10 py-4 rounded-2xl font-bold text-xl shadow-lg shadow-rose-500/30 transition-all hover:-translate-y-1 active:scale-95 hidden">
+                        class="bg-rose-500 hover:bg-rose-600 text-white px-8 py-3 md:px-10 md:py-4 rounded-2xl font-bold text-lg md:text-xl shadow-lg shadow-rose-500/30 transition-all hover:-translate-y-1 active:scale-95 hidden">
                         Seansı Bitir
                     </button>
                 </div>
@@ -201,8 +202,9 @@
 
     <!-- Market Modal (Gizli olarak durur, Butona basınca görünür) -->
     <div id="market-modal"
-        class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center backdrop-blur-sm transition-all text-gray-800">
-        <div class="bg-white rounded-3xl w-full max-w-lg p-6 shadow-2xl transform scale-95 transition-transform">
+        class="fixed inset-0 bg-black/50 z-[150] hidden flex items-center justify-center backdrop-blur-sm transition-all text-gray-800 p-4">
+        <div
+            class="bg-white rounded-3xl w-full max-w-lg p-6 shadow-2xl transform scale-95 transition-transform overflow-hidden flex flex-col max-h-[90vh]">
             <div class="flex justify-between items-center border-b pb-4 mb-4">
                 <h2 class="text-2xl font-black text-blue-800">🛒 Balık Marketi</h2>
                 <button id="close-market-btn"
@@ -217,9 +219,9 @@
 
     <!-- Sonuç Modalı (Seans bittiğinde tebrikler için açılır) -->
     <div id="result-modal"
-        class="fixed inset-0 bg-black/60 z-[100] hidden flex items-center justify-center backdrop-blur-md transition-all text-gray-800">
+        class="fixed inset-0 bg-black/60 z-[200] hidden flex items-center justify-center backdrop-blur-md transition-all text-gray-800 p-4">
         <div
-            class="bg-white rounded-3xl w-full max-w-sm p-8 shadow-2xl flex flex-col items-center text-center transform scale-95 transition-transform">
+            class="bg-white rounded-3xl w-full max-w-sm p-8 shadow-2xl flex flex-col items-center text-center transform scale-95 transition-transform max-h-[95vh] overflow-y-auto">
             <div class="text-7xl mb-4 animate-bounce">🎉</div>
             <h2 class="text-3xl font-black text-blue-800 mb-2">Tebrikler!</h2>
             <p class="text-gray-600 font-medium mb-6">Odaklanma seansını başarıyla tamamladın.</p>
@@ -241,15 +243,21 @@
             </div>
 
             <div id="ai-motivation-container"
-                class="w-full bg-indigo-50 rounded-2xl p-4 mb-6 border border-indigo-100 hidden">
-                <p
-                    class="text-[10px] font-black uppercase tracking-wider text-indigo-400 mb-2 flex items-center justify-center gap-1">
-                    ✨ Gemini AI Motivasyon
-                </p>
-                <div id="ai-loading-spinner" class="hidden flex justify-center py-2 animate-pulse text-indigo-300">
-                    <span class="text-sm font-medium">Motivasyon yükleniyor...</span>
+                class="w-full bg-indigo-50 rounded-2xl p-5 mb-6 border border-indigo-100 hidden relative overflow-hidden">
+                <div class="absolute -right-2 -top-2 text-6xl opacity-10 pointer-events-none" id="ai-persona-bg-emoji">🐢</div>
+
+                <div class="flex items-center gap-3 mb-3 pb-2 border-b border-indigo-100/50">
+                    <div id="ai-persona-emoji" class="text-3xl drop-shadow-sm">🐢</div>
+                    <div class="text-left">
+                        <p class="text-[10px] font-black uppercase tracking-widest text-indigo-400">Gemini AI Motivasyon</p>
+                        <p id="ai-persona-name" class="text-xs font-bold text-indigo-700">Bilge Kaplumbağa</p>
+                    </div>
                 </div>
-                <p id="ai-motivation-text" class="text-xs text-indigo-800 italic leading-relaxed font-medium">
+
+                <div id="ai-loading-spinner" class="hidden flex justify-center py-2 animate-pulse text-indigo-300">
+                    <span class="text-sm font-medium">Su altı dostun hazırlanıyor...</span>
+                </div>
+                <p id="ai-motivation-text" class="text-xs text-indigo-800 italic leading-relaxed font-semibold text-center">
                 </p>
             </div>
 
@@ -262,9 +270,9 @@
 
     <!-- Hoşgeldin & Tanıtım Modalı (Onboarding) -->
     <div id="welcome-modal"
-        class="fixed inset-0 bg-black/70 z-[200] hidden flex items-center justify-center backdrop-blur-md transition-all text-gray-800">
+        class="fixed inset-0 bg-black/70 z-[300] hidden flex items-center justify-center backdrop-blur-md transition-all text-gray-800 p-4">
         <div
-            class="bg-white rounded-[2rem] w-full max-w-2xl p-0 shadow-2xl overflow-hidden flex flex-col transform scale-95 transition-transform">
+            class="bg-white rounded-[2rem] w-full max-w-2xl p-0 shadow-2xl overflow-hidden flex flex-col transform scale-95 transition-transform max-h-[95vh]">
             <!-- Arka Plan Süsü -->
             <div
                 class="h-32 bg-gradient-to-r from-teal-500 to-blue-600 flex items-center justify-center text-6xl shadow-inner uppercase tracking-widest font-black text-white/20 select-none">
@@ -276,7 +284,8 @@
                     <h2 class="text-3xl font-black text-blue-800 mb-4">🌊 AquaPosture'a Hoş Geldin!</h2>
                     <p class="text-gray-600 leading-relaxed mb-6 font-medium">Bizi tercih ettiğin için teşekkürler!
                         AquaPosture, sadece duruşunu düzeltmekle kalmaz, aynı zamanda sana ait canlı bir su altı dünyası
-                        yaratmanı sağlar.</p>
+                        yaratmanı sağlar. En verimli şekilde kullanabilmek için bilgisayardan giriş yapmanı öneririz.
+                    </p>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                         <div class="bg-blue-50 p-4 rounded-2xl border border-blue-100">

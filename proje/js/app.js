@@ -8,8 +8,8 @@ const app = {
     isSessionActive: false,
     userData: null,
     didNotifySlouch: false,
-    alertInterval: null,
     alertAudio: new Audio("https://cdn.freesound.org/previews/254/254818_4597795-lq.mp3"),
+    successAudio: new Audio("https://cdn.freesound.org/previews/171/171671_2437358-lq.mp3"),
 
     init: function () {
         console.log("🌊 AquaPosture Başlatılıyor...");
@@ -167,6 +167,7 @@ const app = {
                 if (ui.elements.marketBtn) ui.elements.marketBtn.classList.remove('hidden');
                 if (ui.elements.viewAquariumBtn) ui.elements.viewAquariumBtn.classList.remove('hidden');
                 if (ui.elements.socialBtn) ui.elements.socialBtn.classList.remove('hidden'); // Sosyal Button
+                if (ui.elements.weeklyReportBtn) ui.elements.weeklyReportBtn.classList.remove('hidden'); // Rapor Button
 
                 // Veritabanı (Firestore) Yükleme
                 let data = await dbManager.initUserDoc(user.uid, user.displayName);
@@ -211,6 +212,7 @@ const app = {
                 if (ui.elements.marketBtn) ui.elements.marketBtn.classList.add('hidden');
                 if (ui.elements.viewAquariumBtn) ui.elements.viewAquariumBtn.classList.add('hidden');
                 if (ui.elements.socialBtn) ui.elements.socialBtn.classList.add('hidden');
+                if (ui.elements.weeklyReportBtn) ui.elements.weeklyReportBtn.classList.add('hidden');
                 app.userData = null;
                 app.coins = 0;
                 ui.updateCoins(0);
@@ -260,15 +262,18 @@ const app = {
                     e.target.disabled = true;
 
                     if (window.auth.currentUser && app.userData) {
-                        const result = await dbManager.buyFish(
-                            window.auth.currentUser.uid,
-                            app.userData.fishes,
-                            app.coins,
-                            fishId,
-                            fishObj.cost
-                        );
+                            const fishCost = parseInt(e.target.getAttribute('data-cost') || 0);
+
+                            const result = await dbManager.buyFish(
+                                window.auth.currentUser.uid,
+                                app.userData.fishes,
+                                app.coins,
+                                fishId,
+                                fishCost
+                            );
                         if (result.success) {
                             app.coins = result.newTotal;
+                            app.userData.coins = result.newTotal; // Sync userData
                             app.userData.fishes = result.newFishes;
 
                             ui.updateCoins(app.coins);
@@ -297,6 +302,21 @@ const app = {
         }
         if (ui.elements.closeSocialBtn) {
             ui.elements.closeSocialBtn.addEventListener('click', () => ui.toggleSocialModal(false));
+        }
+
+        // --- WEEKLY REPORT EVENTS ---
+        ui.initWeeklyReportModal();
+        if (ui.elements.weeklyReportBtn) {
+            ui.elements.weeklyReportBtn.addEventListener('click', async () => {
+                ui.toggleWeeklyReportModal(true);
+                ui.showWeeklyReportLoading();
+                if (window.auth.currentUser) {
+                    await geminiManager.generateWeeklyReport(window.auth.currentUser.uid);
+                }
+            });
+        }
+        if (ui.elements.closeWeeklyReportBtn) {
+            ui.elements.closeWeeklyReportBtn.addEventListener('click', () => ui.toggleWeeklyReportModal(false));
         }
 
         if (ui.elements.sendRequestBtn) {
@@ -447,6 +467,12 @@ const app = {
         const earnedCoins = Math.floor(this.sessionGoodPostureSeconds / 300);
 
         ui.showResultModal(this.sessionTargetMinutes, this.sessionGoodPostureSeconds, earnedCoins);
+        
+        // Seans Başarı Sesi Çal
+        try {
+            this.successAudio.currentTime = 0;
+            this.successAudio.play().catch(e => console.log("Ses çalma engellendi:", e));
+        } catch(err) {}
 
         // Gemini AI Motivasyon Mesajı Üret
         const goodMins = Math.floor(this.sessionGoodPostureSeconds / 60);
@@ -463,6 +489,13 @@ const app = {
             window.db.collection("users").doc(window.auth.currentUser.uid).update({
                 coins: this.coins,
                 failedSessions: 0
+            });
+
+            // SEANS KAYDI (HAFTALIK RAPOR İÇİN)
+            dbManager.saveSessionRecord(window.auth.currentUser.uid, {
+                totalMinutes: this.sessionTargetMinutes,
+                goodMinutes: goodMins,
+                earnedCoins: earnedCoins
             });
         }
     },

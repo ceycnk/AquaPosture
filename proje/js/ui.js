@@ -122,9 +122,20 @@ const ui = {
         this.elements.aiText.textContent = "";
     },
 
-    showAIMessage: function(text) {
+    showAIMessage: function(data) {
         this.elements.aiLoading.classList.add('hidden');
-        this.elements.aiText.textContent = `"${text}"`;
+        
+        // Eğer data bir nesne ise (yeni format), persona ve emoji'yi de güncelle
+        if (typeof data === 'object') {
+            document.getElementById('ai-persona-emoji').textContent = data.emoji || "✨";
+            document.getElementById('ai-persona-name').textContent = data.persona || "AquaAsistan";
+            document.getElementById('ai-persona-bg-emoji').textContent = data.emoji || "✨";
+            this.elements.aiText.textContent = `"${data.message}"`;
+        } else {
+            // Eskiden sadece string geliyordu, geriye dönük uyumluluk
+            this.elements.aiText.textContent = `"${data}"`;
+        }
+
         // Hafif bir giriş efekti
         this.elements.aiText.classList.add('animate-in', 'fade-in', 'duration-700');
     },
@@ -417,8 +428,8 @@ const ui = {
     
     checkAndInitDirt: function() {
         const todayStr = new Date().toDateString();
-        // DEMO & TEST İÇİN HER ZAMAN KİRLİ BAŞLASIN: (Daha sonra || kısmını silebiliriz)
-        const lastCleanStr = "TEST"; // localStorage.getItem('lastCleanDate');
+        // Artık sadece her gün bir kez kirlenecek (localStorage üzerinden kontrol)
+        const lastCleanStr = localStorage.getItem('lastCleanDate');
         
         // Eğer en son temizlik tarihi bugün değilse (Önceki günse veya ilk girişi ise) cam kirlenir
         if (lastCleanStr !== todayStr) {
@@ -426,6 +437,7 @@ const ui = {
             this.glassCleanProgress = 0;
             
             const canvas = document.getElementById('dirty-glass');
+            if(!canvas) return;
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
             const ctx = canvas.getContext('2d');
@@ -594,8 +606,8 @@ const ui = {
         // Sosyal Butonunu Ekle
         const socialBtn = document.createElement('button');
         socialBtn.id = 'social-btn';
-        socialBtn.className = 'hidden relative bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl font-bold transition-all shadow-md active:scale-95 flex items-center gap-2';
-        socialBtn.innerHTML = '👥 Sosyal <span id="social-badge" class="hidden absolute -top-1 -right-1 w-3.5 h-3.5 bg-yellow-400 border-2 border-white rounded-full shadow-sm"></span>';
+        socialBtn.className = 'hidden relative bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-xl font-bold text-sm transition-all shadow-md active:scale-95 flex items-center gap-1.5 shrink-0';
+        socialBtn.innerHTML = '👥 Sosyal <span id="social-badge" class="hidden absolute -top-1 -right-1 w-3 h-3 bg-yellow-400 border-2 border-white rounded-full shadow-sm"></span>';
         
         // Market butonundan önceye ekle
         headerBtnContainer.insertBefore(socialBtn, this.elements.marketBtn);
@@ -617,11 +629,13 @@ const ui = {
 
                     <div class="flex-1 overflow-y-hidden grid grid-cols-1 md:grid-cols-2 gap-6 min-h-0">
                         <!-- Liderlik ve Arkadaşlar -->
-                        <div class="flex flex-col min-h-0">
-                            <h3 class="font-bold text-gray-500 mb-2 uppercase text-xs tracking-wider shrink-0">🏆 Liderlik Tablosu</h3>
-                            <div id="leaderboard-list" class="flex flex-col gap-2 mb-6 max-h-32 overflow-y-auto pr-1 shrink-0"></div>
+                        <div class="flex flex-col min-h-0 bg-gray-50/50 p-4 rounded-2xl border border-gray-100">
+                            <h3 class="font-bold text-gray-500 mb-3 uppercase text-[10px] tracking-widest shrink-0 flex items-center gap-2">
+                                🏆 Haftalık Duruş Liderleri (Dk)
+                            </h3>
+                            <div id="leaderboard-list" class="flex flex-col gap-2 mb-6 overflow-y-auto pr-1 flex-1"></div>
                             
-                            <h3 class="font-bold text-gray-500 mb-2 uppercase text-xs tracking-wider shrink-0">🤝 Arkadaşlarım</h3>
+                            <h3 class="font-bold text-gray-500 mb-3 uppercase text-[10px] tracking-widest shrink-0">🤝 Arkadaşlarım</h3>
                             <div id="friends-list" class="flex flex-col gap-2 overflow-y-auto flex-1 pr-1 pb-2"></div>
                         </div>
 
@@ -682,7 +696,7 @@ const ui = {
             this.elements.leaderboardList.innerHTML += `
                 <div class="flex justify-between items-center bg-gray-50 p-2 px-3 rounded-lg border border-gray-100">
                     <span class="font-bold text-gray-700 font-mono">${rankEmoji} @${user.username} <span class="text-xs text-orange-500 ml-1 font-sans font-black">${user.streak > 0 ? '🔥'+user.streak : ''}</span></span>
-                    <span class="font-black text-yellow-500">${user.coins} 🪙</span>
+                    <span class="font-black text-indigo-600">${user.weeklyMinutes || 0} <span class="text-[10px] font-bold uppercase ml-0.5">Dk</span> ⏱️</span>
                 </div>
             `;
         });
@@ -716,5 +730,82 @@ const ui = {
                 `;
             });
         }
+    },
+
+    // --- WEEKLY REPORT (RAPORLAMA) ---
+    initWeeklyReportModal: function() {
+        const headerBtnContainer = this.elements.marketBtn ? this.elements.marketBtn.parentElement : null;
+        if (!headerBtnContainer) return;
+
+        const reportBtn = document.createElement('button');
+        reportBtn.id = 'weekly-report-btn';
+        reportBtn.className = 'hidden bg-teal-600 hover:bg-teal-700 text-white px-3 py-1.5 rounded-xl font-bold text-sm transition-all shadow-md active:scale-95 flex items-center gap-1.5 shrink-0';
+        reportBtn.innerHTML = '📊 Rapor';
+        
+        // Market ve Sosyal butonunun yanına ekle
+        headerBtnContainer.insertBefore(reportBtn, this.elements.marketBtn);
+        this.elements.weeklyReportBtn = reportBtn;
+
+        const modalHtml = `
+            <div id="weekly-report-modal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center backdrop-blur-sm transition-all text-gray-800">
+                <div class="bg-white rounded-[2rem] w-full max-w-2xl p-8 shadow-2xl transform scale-95 transition-transform flex flex-col max-h-[90vh] overflow-hidden">
+                    <div class="flex justify-between items-center border-b border-teal-100 pb-4 mb-6 shrink-0">
+                        <h2 class="text-3xl font-black text-teal-800 flex items-center gap-3">
+                            <span class="text-4xl">🔱</span> Akvaryum Karnesi
+                        </h2>
+                        <button id="close-weekly-report-btn" class="text-gray-400 hover:text-rose-500 text-4xl font-light transition">&times;</button>
+                    </div>
+
+                    <div id="weekly-report-content" class="flex-1 overflow-y-auto pr-2 custom-scrollbar">
+                        <div id="weekly-report-loading" class="flex flex-col items-center justify-center py-20 gap-4">
+                            <div class="w-12 h-12 border-4 border-teal-200 border-t-teal-600 rounded-full animate-spin"></div>
+                            <p class="text-teal-700 font-bold animate-pulse text-lg">Gemini derinlerden verileri topluyor...</p>
+                        </div>
+                        <div id="weekly-report-text" class="hidden prose prose-teal max-w-none text-gray-700 leading-relaxed">
+                            <!-- AI Raporu Buraya Gelecek -->
+                        </div>
+                    </div>
+
+                    <div class="mt-8 pt-6 border-t border-teal-50 shrink-0 text-center">
+                        <p class="text-xs text-gray-400 font-medium italic">Bu rapor son 7 günlük aktiviteniz temel alınarak yapay zeka tarafından oluşturulmuştur.</p>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+        this.elements.weeklyReportModal = document.getElementById('weekly-report-modal');
+        this.elements.closeWeeklyReportBtn = document.getElementById('close-weekly-report-btn');
+        this.elements.weeklyReportText = document.getElementById('weekly-report-text');
+        this.elements.weeklyReportLoading = document.getElementById('weekly-report-loading');
+    },
+
+    toggleWeeklyReportModal: function(show) {
+        if(show) {
+            this.elements.weeklyReportModal.classList.remove('hidden');
+            setTimeout(() => {
+                this.elements.weeklyReportModal.children[0].classList.remove('scale-95');
+                this.elements.weeklyReportModal.children[0].classList.add('scale-100');
+            }, 10);
+        } else {
+            this.elements.weeklyReportModal.children[0].classList.remove('scale-100');
+            this.elements.weeklyReportModal.children[0].classList.add('scale-95');
+            setTimeout(() => {
+                this.elements.weeklyReportModal.classList.add('hidden');
+            }, 200);
+        }
+    },
+
+    showWeeklyReportLoading: function() {
+        this.elements.weeklyReportLoading.classList.remove('hidden');
+        this.elements.weeklyReportText.classList.add('hidden');
+        this.elements.weeklyReportText.innerHTML = "";
+    },
+
+    renderWeeklyReport: function(htmlContent) {
+        this.elements.weeklyReportLoading.classList.add('hidden');
+        this.elements.weeklyReportText.classList.remove('hidden');
+        this.elements.weeklyReportText.innerHTML = htmlContent;
     }
 };

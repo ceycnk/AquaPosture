@@ -10,7 +10,10 @@ const poseManager = {
     isGoodPosture: true,
 
     baseNeckY: 0,
+    baseShoulderWidth: 0,
+    baseNoseShoulderY: 0,
 
+    calibrationData: [], // To store multiple frames during calibration
     isCalibrated: false,
     isProcessing: false,
 
@@ -164,13 +167,13 @@ const poseManager = {
 
 
             if (!this.isCalibrated) {
-
-                this.calibrate(results.poseLandmarks);
-
+                // Kalibrasyon sırasında veri topla
+                this.calibrationData.push(results.poseLandmarks);
+                if (this.calibrationData.length > 30) { // Yaklaşık 1-2 saniyelik veri
+                    this.finalizeCalibration();
+                }
             } else {
-
                 this.analyzePosture(results.poseLandmarks);
-
             }
 
         }
@@ -178,20 +181,37 @@ const poseManager = {
         this.canvasCtx.restore();
     },
 
-    calibrate: function (landmarks) {
-        const leftShoulder = landmarks[11];
-        const rightShoulder = landmarks[12];
-        const leftEar = landmarks[7];
-        const rightEar = landmarks[8];
+    finalizeCalibration: function () {
+        if (this.calibrationData.length === 0) return;
 
-        if (!leftShoulder || !rightShoulder || !leftEar || !rightEar) return;
+        let totalNeck = 0;
+        let totalWidth = 0;
+        let totalNose = 0;
 
-        const midEarY = (leftEar.y + rightEar.y) / 2;
-        const midShoulderY = (leftShoulder.y + rightShoulder.y) / 2;
+        this.calibrationData.forEach(landmarks => {
+            const leftSh = landmarks[11];
+            const rightSh = landmarks[12];
+            const leftEar = landmarks[7];
+            const rightEar = landmarks[8];
+            const nose = landmarks[0];
 
-        this.baseNeckY = midShoulderY - midEarY;
+            if (leftSh && rightSh && leftEar && rightEar && nose) {
+                const midEarY = (leftEar.y + rightEar.y) / 2;
+                const midShY = (leftSh.y + rightSh.y) / 2;
+                totalNeck += (midShY - midEarY);
+                totalWidth += Math.abs(leftSh.x - rightSh.x);
+                totalNose += Math.abs(nose.y - midShY);
+            }
+        });
+
+        const count = this.calibrationData.length;
+        this.baseNeckY = totalNeck / count;
+        this.baseShoulderWidth = totalWidth / count;
+        this.baseNoseShoulderY = totalNose / count;
+
         this.isCalibrated = true;
-        console.log(`Kalibrasyon tamam. İdeal: ${this.baseNeckY.toFixed(3)}`);
+        this.calibrationData = [];
+        console.log(`Kalibrasyon tamamlandı. Adaptif Duruş Sistemi Aktif.`);
 
         if (this.onPostureChange) {
             this.isGoodPosture = true;
@@ -200,20 +220,33 @@ const poseManager = {
     },
 
     analyzePosture: function (landmarks) {
-        const leftShoulder = landmarks[11];
-        const rightShoulder = landmarks[12];
+        const leftSh = landmarks[11];
+        const rightSh = landmarks[12];
         const leftEar = landmarks[7];
         const rightEar = landmarks[8];
+        const nose = landmarks[0];
 
-        if (!leftShoulder || !rightShoulder || !leftEar || !rightEar) return;
+        if (!leftSh || !rightSh || !leftEar || !rightEar || !nose) return;
 
+        // 1. Boyun Uzunluğu (Dikey)
         const midEarY = (leftEar.y + rightEar.y) / 2;
-        const midShoulderY = (leftShoulder.y + rightShoulder.y) / 2;
-        const currentNeckY = midShoulderY - midEarY;
+        const midShY = (leftSh.y + rightSh.y) / 2;
+        const currentNeckY = midShY - midEarY;
+        const neckRatio = currentNeckY / this.baseNeckY;
 
-        const threshold = this.baseNeckY * 0.80;
+        // 2. Omuz Genişliği (Kamburlaşınca omuzlar öne gelir ve 2D'de daralır)
+        const currentWidth = Math.abs(leftSh.x - rightSh.x);
+        const widthRatio = currentWidth / this.baseShoulderWidth;
+
+        // 3. Adaptif Duruş Kontrolü
+        // Dik otururken çok hassas (%89), arkaya yaslanınca daha esnek (%80)
+        let threshold = 0.89; 
+        if (widthRatio < 0.95) {
+            threshold = 0.80; // Arkaya yaslanınca hata payı bırak
+        }
+
         const wasGood = this.isGoodPosture;
-        this.isGoodPosture = (currentNeckY >= threshold);
+        this.isGoodPosture = (neckRatio >= threshold);
 
         if (wasGood !== this.isGoodPosture && this.onPostureChange) {
             this.onPostureChange(this.isGoodPosture);

@@ -123,15 +123,63 @@ const dbManager = {
     // 2. Sosyal Verileri (Liderlik, İstekler, Arkadaşlar) Getirme
     getSocialData: async function(uid, userData) {
         try {
-            // Arkadaşları getir
-            let rawFriends = [];
-            if (userData.friends && userData.friends.length > 0) {
-                const friendPromises = userData.friends.map(fUid => window.db.collection("users").doc(fUid).get());
-                const friendDocs = await Promise.all(friendPromises);
-                rawFriends = friendDocs.filter(d => d.exists).map(d => ({uid: d.id, ...d.data()}));
-            }
+            const sevenDaysAgo = new Date();
+            sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+            // Yardımcı: Bir kullanıcının haftalık dakikalarını getir
+            const fetchWeeklyMinutes = async (userUid) => {
+                try {
+                    const snap = await window.db.collection("users").doc(userUid).collection("sessions")
+                        .where("timestamp", ">=", sevenDaysAgo)
+                        .get();
+                    
+                    let total = 0;
+                    snap.forEach(doc => {
+                        total += (doc.data().goodMinutes || 0);
+                    });
+                    return total;
+                } catch(err) {
+                    console.error("Haftalık dakika çekme hatası:", userUid, err);
+                    return 0;
+                }
+            };
+
+            // Arkadaşları ve onların haftalık dakikalarını getir
+            let leaderboardEntries = [];
             
-            // İstekleri (Gelen) getirenlerin isimlerini çöz (Sadece UID karmaşasını engelle)
+            // 1. Önce kendimi ekle
+            const myMinutes = await fetchWeeklyMinutes(uid);
+            leaderboardEntries.push({
+                uid: uid,
+                username: userData.username || "Ben",
+                streak: userData.streak || 0,
+                weeklyMinutes: myMinutes
+            });
+
+            // 2. Arkadaşları getir
+            if (userData.friends && userData.friends.length > 0) {
+                const friendPromises = userData.friends.map(async (fUid) => {
+                    const doc = await window.db.collection("users").doc(fUid).get();
+                    if (doc.exists) {
+                        const fData = doc.data();
+                        const fMins = await fetchWeeklyMinutes(fUid);
+                        return {
+                            uid: fUid,
+                            username: fData.username || "Adsız",
+                            streak: fData.streak || 0,
+                            weeklyMinutes: fMins
+                        };
+                    }
+                    return null;
+                });
+                const friendsResults = await Promise.all(friendPromises);
+                leaderboardEntries.push(...friendsResults.filter(f => f !== null));
+            }
+
+            // Liderlik Tablosu: Dakikaya göre DESC sırala
+            const leaderboard = leaderboardEntries.sort((a, b) => b.weeklyMinutes - a.weeklyMinutes);
+            
+            // İstekleri (Gelen) getirenlerin isimlerini çöz
             let friendRequests = [];
             if (userData.friendRequestsIn && userData.friendRequestsIn.length > 0) {
                 const reqPromises = userData.friendRequestsIn.map(reqUid => window.db.collection("users").doc(reqUid).get());
@@ -139,15 +187,8 @@ const dbManager = {
                 friendRequests = reqDocs.filter(d => d.exists).map(d => ({uid: d.id, username: d.data().username || "Bilinmeyen"}));
             }
             
-            // Liderlik Tablosu: Kendim + Arkadaşlar -> coins'e göre desc
-            const myself = {uid: uid, ...userData};
-            // Kullanıcının kendi username'i yoksa "Ben" yaz.
-            if(!myself.username) myself.username = "Ben"; 
-            
-            const leaderboard = [myself, ...rawFriends].sort((a, b) => b.coins - a.coins);
-            
             return {
-                friends: rawFriends,
+                friends: leaderboardEntries.filter(e => e.uid !== uid), // Kendim haricindekiler arkadaştır
                 friendRequests: friendRequests,
                 leaderboard: leaderboard
             };
@@ -226,6 +267,39 @@ const dbManager = {
         } catch (e) {
             console.error("Istek kabul hatası", e);
             return false;
+        }
+    },
+
+    // --- SESSION HISTORY (RAPORLAMA) ---
+    saveSessionRecord: async function(uid, sessionData) {
+        try {
+            // Seans verisini "sessions" alt koleksiyonuna ekle
+            await window.db.collection("users").doc(uid).collection("sessions").add({
+                ...sessionData,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            console.log("Firestore: Seans kaydı başarıyla eklendi.");
+            return true;
+        } catch (e) {
+            console.error("Seans kaydetme hatası:", e);
+            return false;
+        }
+    },
+
+    getWeeklySessions: async function(uid) {
+        try {
+            const sevenDaysAgo = new Date();
+            sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+            const snapshot = await window.db.collection("users").doc(uid).collection("sessions")
+                .where("timestamp", ">=", sevenDaysAgo)
+                .orderBy("timestamp", "desc")
+                .get();
+
+            return snapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
+        } catch (e) {
+            console.error("Haftalık veri çekme hatası:", e);
+            return [];
         }
     }
 };

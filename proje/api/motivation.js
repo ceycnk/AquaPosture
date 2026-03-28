@@ -20,8 +20,15 @@ export default async function handler(req, res) {
     - Dik Duruş Süresi: ${goodTime} dakika
     - Kazanılan Puan: ${coins} AquaCoin
     
-    Lütfen kullanıcıyı tebrik eden, deniz temalı (balıklar, mercanlar, okyanus esintisi), 
-    neşeli ve en fazla 2 cümlelik kısa bir motivasyon mesajı yaz. Yanıtında sadece mesaj olsun. Türkçe konuş.`;
+    Lütfen kullanıcıyı tebrik eden, neşeli ve her seferinde farklı bir su altı karakterinin (Örn: Bilge Kaplumbağa, Neşeli Yengeç, Zeki Yunus, Sakin Mercan vb.) ağzından yazılmış bir mesaj üret.
+
+    Yanıtını SADECE aşağıdaki JSON formatında ver, başka hiçbir metin ekleme:
+    {
+      "emoji": "Karakterin emojisi (Örn: 🐢)",
+      "persona": "Karakterin ismi (Örn: Bilge Kaplumbağa)",
+      "message": "Kullanıcıya mesajın (En fazla 2 cümle)"
+    }
+    Türkçe konuş.`;
 
     try {
         const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
@@ -32,15 +39,22 @@ export default async function handler(req, res) {
             body: JSON.stringify({
                 contents: [{
                     parts: [{ text: prompt }]
-                }]
+                }],
+                generationConfig: {
+                    temperature: 0.9,
+                    topP: 0.95,
+                    maxOutputTokens: 250,
+                    responseMimeType: "application/json"
+                }
             })
         });
 
         const data = await response.json();
         
         if (data && data.candidates && data.candidates[0] && data.candidates[0].content) {
-            const aiMsg = data.candidates[0].content.parts[0].text.trim();
-            return res.status(200).json({ message: aiMsg });
+            const rawJson = data.candidates[0].content.parts[0].text.trim();
+            const parsedData = JSON.parse(rawJson);
+            return res.status(200).json(parsedData);
         } else {
             return res.status(502).json({ error: 'Gemini API geçersiz yanıt verdi.' });
         }
