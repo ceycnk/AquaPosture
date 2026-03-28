@@ -34,7 +34,6 @@ Kullanıcıların bilgisayar başındaki duruş bozukluklarını, bir dijital ak
 * **Giriş Sistemi:** Google ile hızlı giriş (Firebase Auth).
 * **Arkadaş Listesi:** Kullanıcı adıyla arkadaş ekleme ve onaylama mekanizması.
 * **Liderlik Tablosu:** Sadece ekli arkadaşlar arasında haftalık "En Çok Dik Durma Puanı" toplayanların sıralanması.
-* **Streak (Alev):** Üst üste başarılı günlerde yanan alev ikonu (hedef bozulursa söner).
 
 ---
 
