@@ -37,12 +37,6 @@ Yapay zeka bu projede "Gözlemci ve Hakem" rolündedir:
 
     Risk Faktörü: Üst üste 3 kez hedefini gerçekleştiremeyen kullanıcı, akvaryumundaki rastgele bir balığını kaybeder.
 
-🔥 Duruş Serisi (Streak)
-
-    Hedefini her gün üst üste tamamlayan kullanıcılar "Duruş Serisi" başlatır.
-
-    Ekranda bir Alev Emojisi ve özel rütbe rozetleri belirir. Hedef bir gün bile aksarsa alev söner ve seri sıfırlanır.
-
 📊 Bölüm Liderlik Tablosu (Social)
 
     Kullanıcılar arkadaş grupları veya sınıfları için özel odalar açabilir.
