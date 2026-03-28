@@ -17,7 +17,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js" crossorigin="anonymous"></script>
 </head>
 
-<body class="bg-teal-50 text-gray-800 font-sans overflow-hidden">
+<body class="bg-teal-50 text-gray-800 font-sans">
     <!-- Akvaryum Arka Plan Katmanı -->
     <div id="aquarium-bg"
         class="fixed inset-0 z-0 bg-gradient-to-b from-cyan-400 via-blue-600 to-blue-900 transition-all duration-700 ease-in-out">
@@ -62,7 +62,7 @@
     </div>
 
     <div id="ui-layer"
-        class="relative z-10 min-h-screen w-full flex flex-col p-4 md:p-6 max-w-6xl mx-auto transition-all duration-700 ease-in-out overflow-x-hidden">
+        class="relative z-10 min-h-screen w-full flex flex-col p-4 md:p-6 max-w-6xl mx-auto transition-all duration-700 ease-in-out overflow-x-hidden overflow-y-auto">
 
         <header
             class="flex flex-col md:flex-row justify-between items-center gap-2 md:gap-0 bg-white/80 backdrop-blur-md p-3 rounded-2xl shadow-sm border border-white/50">
@@ -98,7 +98,7 @@
         </header>
 
         <main
-            class="flex-1 flex flex-col md:flex-row gap-6 md:gap-8 mt-6 overflow-y-auto md:overflow-visible pb-10 md:pb-0">
+            class="flex-1 flex flex-col md:flex-row gap-6 md:gap-8 mt-6 pb-10">
 
             <section
                 class="w-full md:w-1/3 shrink-0 bg-white/80 backdrop-blur-md p-5 rounded-2xl shadow-sm border border-white/50 flex flex-col">
