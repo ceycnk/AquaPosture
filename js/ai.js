@@ -51,19 +51,25 @@ const geminiManager = {
             });
 
             const data = await response.json();
-
-            if (data && data.report) {
-                // Markdown -> HTML dönüşümü (Basit bir çözüm veya kütüphane gerekebilir ama Gemini'den direkt HTML veya temiz metin isteyeceğiz)
+            
+            if (response.ok && data && data.report) {
                 ui.renderWeeklyReport(data.report);
             } else {
-                throw new Error("Rapor alınamadı.");
+                const errorDetail = data.error || `Bağlantı Hatası (Kod: ${response.status})`;
+                throw new Error(errorDetail);
             }
 
         } catch (error) {
             console.error("Haftalık Rapor Hatası:", error);
             const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
             let msg = "Rapor şu an hazırlanırken bir fırtınaya yakalandık. Lütfen sonra tekrar deneyin! 🌪️";
-            if (isLocal) msg = "⚠️ Localhost'tasınız. Vercel /api fonksiyonları 'vercel dev' komutu olmadan çalışmaz. Lütfen projeyi Vercel'e deploy edin veya vercel dev kullanın.";
+            
+            if (isLocal) {
+                msg = "⚠️ Localhost'tasınız. Vercel /api fonksiyonları 'vercel dev' komutu olmadan çalışmaz. Lütfen projeyi Vercel'e deploy edin veya vercel dev kullanın.";
+            } else if (error.message) {
+                msg = `⚠️ HATA: ${error.message}`;
+            }
+
             ui.renderWeeklyReport(`<p class='text-center py-10 text-rose-500 font-bold'>${msg}</p>`);
         }
     }

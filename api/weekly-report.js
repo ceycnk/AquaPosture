@@ -60,10 +60,12 @@ export default async function handler(req, res) {
             
             return res.status(200).json({ report: aiMsg });
         } else {
-            return res.status(502).json({ error: 'Gemini API geçersiz yanıt verdi.' });
+            const apiError = data.error?.message || 'Gemini API geçersiz yanıt verdi veya kota doldu.';
+            console.error("Gemini API Detaylı Hata:", data.error || data);
+            return res.status(502).json({ error: apiError });
         }
     } catch (error) {
         console.error("Gemini Weekly Report Proxy Hatası:", error);
-        return res.status(500).json({ error: 'Rapor oluşturulamadı.' });
+        return res.status(500).json({ error: `Sunucu Hatası: ${error.message}` });
     }
 }
