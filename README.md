@@ -35,7 +35,7 @@ Bu projede hibrit bir AI mimarisi kullanılmıştır:
     ```
 2.  **Proje Klasörüne Gidin:**
     ```bash
-    cd AquaPosture
+    cd proje
     ```
 3.  **API Anahtarını Hazırlayın:**
     Bir `.env` dosyası oluşturun ve **Google AI Studio**'dan aldığınız API anahtarını ekleyin:
