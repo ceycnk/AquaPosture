@@ -31,6 +31,14 @@ kişiselleştirilmiş motivasyon mesajları ve haftalık görsel raporlar üreti
 - Node.js (Vercel CLI için)
 - Firebase projesi + Gemini API anahtarı
 
+## ⚖️ Metodoloji ve Önemli Notlar
+
+AquaPosture, gelişmiş bir görüntü işleme altyapısı kullansa da aşağıdaki prensipler üzerine inşa edilmiştir:
+
+* **Davranışsal Farkındalık Aracı:** Bu uygulama bir tıbbi cihaz değildir; temel amacı cerrahi hassasiyette ölçüm yapmak değil, kullanıcıda **Bilişsel Farkındalık (Cognitive Awareness)** yaratmaktır.
+* **Bağıl Analiz Mantığı:** Tek açılı 2D görüntüleme sistemlerinde %100 medikal doğruluk teknik bir kısıttır. AquaPosture, mutlak açılardan ziyade kullanıcının kendi **baz hattına (baseline)** göre olan ciddi sapmalarını yakalamaya odaklanır.
+* **Geri Bildirim Döngüsü:** Odak noktamız statik bir ölçüm değil, akvaryum ekosistemi üzerinden kurulan canlı bir geri bildirim döngüsü ile kullanıcıda kalıcı bir **davranış değişikliği** sağlamaktır.
+
 ### Kurulum
 ```bash
 # Repoyu klonla
@@ -46,13 +54,7 @@ GEMINI_API_KEY=your_gemini_api_key_here
 
 Not: Firebase yapılandırması js/firebase-config.js içinde yer almaktadır. Firebase Console'da uygulamanızın domain adresini Authorized Domains listesine eklemeyi unutmayın.
 
-## ⚖️ Metodoloji ve Önemli Notlar
 
-AquaPosture, gelişmiş bir görüntü işleme altyapısı kullansa da aşağıdaki prensipler üzerine inşa edilmiştir:
-
-* **Davranışsal Farkındalık Aracı:** Bu uygulama bir tıbbi cihaz değildir; temel amacı cerrahi hassasiyette ölçüm yapmak değil, kullanıcıda **Bilişsel Farkındalık (Cognitive Awareness)** yaratmaktır.
-* **Bağıl Analiz Mantığı:** Tek açılı 2D görüntüleme sistemlerinde %100 medikal doğruluk teknik bir kısıttır. AquaPosture, mutlak açılardan ziyade kullanıcının kendi **baz hattına (baseline)** göre olan ciddi sapmalarını yakalamaya odaklanır.
-* **Geri Bildirim Döngüsü:** Odak noktamız statik bir ölçüm değil, akvaryum ekosistemi üzerinden kurulan canlı bir geri bildirim döngüsü ile kullanıcıda kalıcı bir **davranış değişikliği** sağlamaktır.
 
 
 
