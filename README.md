@@ -31,7 +31,7 @@ kişiselleştirilmiş motivasyon mesajları ve haftalık görsel raporlar üreti
 - Node.js (Vercel CLI için)
 - Firebase projesi + Gemini API anahtarı
 
-## ⚖️ Metodoloji ve Önemli Notlar
+## Metodoloji ve Önemli Notlar
 
 AquaPosture, gelişmiş bir görüntü işleme altyapısı kullansa da aşağıdaki prensipler üzerine inşa edilmiştir:
 
