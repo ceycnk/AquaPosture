@@ -57,7 +57,8 @@ const app = {
 
                 poseManager.startCamera().then(success => {
                     if (success) {
-                        ui.elements.postureStatus.textContent = "Kamera açık. 3s içinde dik dur...";
+                        ui.elements.postureStatus.textContent = "Kamera açık. Dik otur, ~8-10sn içinde kalibrasyon başlıyor...";
+
                         if (toggleCamBtn) toggleCamBtn.classList.remove('hidden');
                         setTimeout(() => {
                             poseManager.isCalibrated = false;
