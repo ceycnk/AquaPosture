@@ -475,7 +475,7 @@ const ui = {
         
         // Mobilde daha büyük sünger (touch = 140px, mouse = 80px)
         const isMobile = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
-        const radius = isMobile ? 140 : 80;
+        const radius = isMobile ? 100 : 80;
         
         ctx.globalCompositeOperation = 'destination-out';
         ctx.beginPath();
@@ -502,7 +502,7 @@ const ui = {
             const cleanRatio = transparentPixels / totalChecked;
             
             // Mobilde eşik daha düşük (%70), masaüstünde %85
-            const threshold = isMobile ? 0.70 : 0.85;
+            const threshold = isMobile ? 0.80 : 0.85;
             if (cleanRatio > threshold) {
                 this.isGlassDirty = false;
                 
