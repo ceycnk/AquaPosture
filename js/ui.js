@@ -614,8 +614,8 @@ const ui = {
         // Sosyal Butonunu Ekle
         const socialBtn = document.createElement('button');
         socialBtn.id = 'social-btn';
-        socialBtn.className = 'hidden relative bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-xl font-bold text-sm transition-all shadow-md active:scale-95 flex items-center gap-1.5 shrink-0';
-        socialBtn.innerHTML = '👥 Sosyal <span id="social-badge" class="hidden absolute -top-1 -right-1 w-3 h-3 bg-yellow-400 border-2 border-white rounded-full shadow-sm"></span>';
+        socialBtn.className = 'hidden relative bg-indigo-600 hover:bg-indigo-700 text-white px-2 py-1.5 md:px-3 rounded-xl font-bold text-xs md:text-sm transition-all shadow-md active:scale-95 flex items-center gap-1 shrink-0';
+        socialBtn.innerHTML = '👥 <span class="hidden sm:inline">Sosyal</span><span id="social-badge" class="hidden absolute -top-1 -right-1 w-3 h-3 bg-yellow-400 border-2 border-white rounded-full shadow-sm"></span>';
         
         // Market butonundan önceye ekle
         headerBtnContainer.insertBefore(socialBtn, this.elements.marketBtn);
@@ -747,8 +747,8 @@ const ui = {
 
         const reportBtn = document.createElement('button');
         reportBtn.id = 'weekly-report-btn';
-        reportBtn.className = 'hidden bg-teal-600 hover:bg-teal-700 text-white px-3 py-1.5 rounded-xl font-bold text-sm transition-all shadow-md active:scale-95 flex items-center gap-1.5 shrink-0';
-        reportBtn.innerHTML = '📊 Rapor';
+        reportBtn.className = 'hidden bg-teal-600 hover:bg-teal-700 text-white px-2 py-1.5 md:px-3 rounded-xl font-bold text-xs md:text-sm transition-all shadow-md active:scale-95 flex items-center gap-1 shrink-0';
+        reportBtn.innerHTML = '📊 <span class="hidden sm:inline">Rapor</span>';
         
         // Market ve Sosyal butonunun yanına ekle
         headerBtnContainer.insertBefore(reportBtn, this.elements.marketBtn);
