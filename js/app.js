@@ -29,13 +29,20 @@ const app = {
 
         // Fare hareketini küresel olarak yakala ve moduna göre Yemleme/Temizleme yap
         document.addEventListener('mousemove', (e) => {
-            if (!ui.isAquariumMode || !ui.activeTool) return; // Araç seçili değilse işlem yapma
-
+            if (!ui.isAquariumMode || !ui.activeTool) return;
             if (ui.activeTool === 'sponge' && ui.isGlassDirty) {
-                // Sadece Sünger seçiliyken ve cam kirliyken temizle
                 ui.cleanGlass(e);
             }
         });
+
+        // Mobil dokunmatik destek: parmakla cam temizleme
+        document.addEventListener('touchmove', (e) => {
+            if (!ui.isAquariumMode || !ui.activeTool) return;
+            if (ui.activeTool === 'sponge' && ui.isGlassDirty) {
+                e.preventDefault(); // Sayfanın kaymasını engelle
+                ui.cleanGlass(e);
+            }
+        }, { passive: false });
 
         // Tıklama Eylemi: Sadece Yem seçiliyken çalışır
         document.addEventListener('click', (e) => {

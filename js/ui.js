@@ -463,28 +463,36 @@ const ui = {
         const canvas = document.getElementById('dirty-glass');
         const ctx = canvas.getContext('2d');
         
-        // Fare üstünden geçtikçe silen mod (destination-out)
+        // Touch veya mouse koordinatını al
+        let clientX, clientY;
+        if (e.touches && e.touches.length > 0) {
+            clientX = e.touches[0].clientX;
+            clientY = e.touches[0].clientY;
+        } else {
+            clientX = e.clientX;
+            clientY = e.clientY;
+        }
+        
+        // Mobilde daha büyük sünger (touch = 140px, mouse = 80px)
+        const isMobile = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+        const radius = isMobile ? 140 : 80;
+        
         ctx.globalCompositeOperation = 'destination-out';
         ctx.beginPath();
-        // Sabunla silme boyutunu belirleyen yarıçap
-        ctx.arc(e.clientX, e.clientY, 80, 0, Math.PI*2);
+        ctx.arc(clientX, clientY, radius, 0, Math.PI*2);
         ctx.fill();
         
         this.glassCleanProgress++;
         
-        // Gercekci temizleme kontrolu: Acaba cam gercekten silindi mi? (Piksel taramasi)
-        // Her 50 silme isleminde bir camdaki piksellerin transparanligina bakalim
         if(this.glassCleanProgress % 50 === 0) { 
             const reqWidth = canvas.width;
             const reqHeight = canvas.height;
-            // Tarayici kasmasin diye ufak bir orneklem aliyoruz (genel ekrani kuculterek veya step ile)
             const imgData = ctx.getImageData(0, 0, reqWidth, reqHeight);
             let transparentPixels = 0;
-            const step = 40; // Piksel atlama adımı
+            const step = 40;
             let totalChecked = 0;
             
             for (let i = 3; i < imgData.data.length; i += step * 4) {
-                // Kenar yumuşatmaları (anti-aliasing) hesaba katarak mutlak 0 yerine < 20 arıyoruz
                 if (imgData.data[i] < 20) {
                     transparentPixels++;
                 }
@@ -493,11 +501,11 @@ const ui = {
             
             const cleanRatio = transparentPixels / totalChecked;
             
-            // Tolerans payı eklendi: %85 temizlendiyse temiz say (Kullanıcıyı yormamak için)
-            if (cleanRatio > 0.85) {
+            // Mobilde eşik daha düşük (%70), masaüstünde %85
+            const threshold = isMobile ? 0.70 : 0.85;
+            if (cleanRatio > threshold) {
                 this.isGlassDirty = false;
                 
-                // Yosunu tamamen uçurma ve kaybetme animasyonu
                 canvas.style.transition = "opacity 2s ease";
                 canvas.style.opacity = "0";
                 
