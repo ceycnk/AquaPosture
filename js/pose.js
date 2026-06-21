@@ -41,7 +41,7 @@ const poseManager = {
 
             locateFile: (file) => {
 
-                return `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`;
+                return `https://cdn.jsdelivr.net/npm/@mediapipe/pose@0.5.1675469404/${file}`;
 
             }
 
